@@ -1,3 +1,4 @@
+'use client'
 import { OrbitControls, Stage } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
@@ -16,8 +17,9 @@ export const ParticleDisplay = () => {
                 <OrbitControls />
                 {/* <ambientLight intensity={0.5} /> */}
                 {/* <directionalLight position={[-1, 2, 2]} intensity={4} /> */}
-                {/* <BasicParticles /> */}
-                <CustomGeometryParticles count={2000} />
+                {/* <BasicParticles  /> */}
+                {/* <TwistedBox /> */}
+                <CustomGeometryParticles count={8000} />
             </Canvas>
 
         </main>
@@ -125,11 +127,8 @@ const CustomGeometryParticles = ({ count }: CustomGeometryParticlesProps) => {
 
     useFrame((state) => {
         const { clock } = state;
-
-        const material = points.current.material as ShaderMaterial;
-        if (material?.uniforms.uTime?.value) {
-            material.uniforms.uTime.value = clock.elapsedTime;
-        }
+        // @ts-expect-error: Wrong inference on types so this is a temporary workaround
+        points.current.material.uniforms.uTime.value = clock.elapsedTime;// eslint-disable-line
 
     });
 
