@@ -7,11 +7,11 @@ export const NavList = () => {
         <div className="w-fit  items-center flex justify-center">
             <ul className="flex flex-col gap-2 text-base w-fit rounded-2xl h-full text-white ">
                 <li className="text-5xl font-semibold tracking-tight sm:text-[5rem]">
-                    Ron<span className="text-[#4e9fe9]"> Rounsifer</span>
+                Ron<span className="text-[#4e9fe9]"> Rounsifer</span>
                 </li>
 
-                <li className="text-white/85">
-                    Just another software engineer that likes to build stuff.
+                <li className="text-white/85 font-light tracking-wide italic">
+                    just another software engineer that likes to build things
                 </li>
                 <ul className="w-full flex flex-row gap-1">
                     <li className="text-white/50">

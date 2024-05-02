@@ -10,7 +10,7 @@ export const CustomCursor = ({
 
     // Update cursor position on mouse move
     const updateCursorPosition = (e: React.MouseEvent) => {
-        setPosition({ x: e.pageX - 37.5, y: e.pageY - 37.5 });
+        setPosition({ x: e.pageX - 25, y: e.pageY - 25 });
     };
 
     if (typeof window !== 'undefined') {
@@ -22,7 +22,7 @@ export const CustomCursor = ({
 
     return (
         <div className={`custom-cursor-container`} onMouseMove={updateCursorPosition}>
-            <div className={`custom-cursor absolute bg-zinc-300 w-[75px] h-[75px] rounded-full mix-blend-difference ${isVisible ? "opacity-100" : "opacity-0"}`} style={{ left: `${position.x}px`, top: `${position.y}px` }}></div>
+            <div className={`custom-cursor absolute bg-zinc-300 w-[50px] h-[50px] rounded-full mix-blend-difference ${isVisible ? "opacity-100" : "opacity-0"}`} style={{ left: `${position.x}px`, top: `${position.y}px` }}></div>
             {children}
         </div>
     );

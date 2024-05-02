@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} cursor-none`}>
+      <body className={`font-sans ${inter.variable} cursor-none overflow-hidden`}>
         {children}
       </body>
     </html>
