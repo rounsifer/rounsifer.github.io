@@ -5,15 +5,15 @@ export const NavList = () => {
 
     return (
         <div className="w-fit  items-center flex justify-center">
-            <ul className="flex flex-col gap-2 text-base w-fit rounded-2xl h-full text-white ">
+            <ul className="flex text-center items-center sm:text-start sm:items-start flex-col gap-2 text-base w-fit rounded-2xl h-full text-white ">
                 <li className="text-5xl font-semibold tracking-tight sm:text-[5rem]">
                 Ron<span className="text-[#4e9fe9]"> Rounsifer</span>
                 </li>
 
-                <li className="text-white/85 font-light tracking-wide italic">
+                <li className="text-white/85 font-light tracking-wide w-2/3 sm:w-full sm:text-start text-center italic">
                     just another software engineer that likes to build things
                 </li>
-                <ul className="w-full flex flex-row gap-1">
+                <ul className="w-full flex flex-row gap-1 justify-center sm:justify-start">
                     <li className="text-white/50">
                         <a href="https://github.com/rounsifer" target="_blank" rel="noopener noreferrer">
                             <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-brand-github mix-blend-exclusion" width="28" height="28" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#2c3e50" fill="none" strokeLinecap="round" strokeLinejoin="round">
