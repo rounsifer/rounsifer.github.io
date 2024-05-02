@@ -7,6 +7,7 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
     output: "export",
+    images: {unoptimized: true},
     reactStrictMode: true,
     swcMinify: true,
     webpack: function (config) {
