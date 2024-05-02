@@ -2,8 +2,11 @@
 import { OrbitControls, Stage } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { Quaternion, Vector3, MathUtils, AdditiveBlending, ShaderMaterial } from "three";
+import { Quaternion, Vector3, MathUtils, AdditiveBlending } from "three";
 import { type Points, type Mesh } from "three";
+
+import { TimelineDefinition, timeline } from "motion";
+
 
 import vertexShader from "./shaders/vertexShader.glsl";
 import fragmentShader from "./shaders/fragmentShader.glsl";
@@ -11,8 +14,17 @@ import fragmentShader from "./shaders/fragmentShader.glsl";
 
 export const ParticleDisplay = () => {
 
+    if (typeof document !== 'undefined') {
+        // will run in client's browser only
+        
+        const fade_in_sequence: TimelineDefinition = [
+            [".particle-display", {opacity: [0,1]}, {duration: 4, at: 0}],
+        ];
+        timeline(fade_in_sequence);
+    }
+
     return (
-        <main className="flex h-[200px]  w-[200px]">
+        <main className="particle-display flex h-[200px]  w-[200px]">
             <Canvas className="flex " camera={{ position: [1.5, 1.5, 1.5], zoom: 4, near: 1, far: 1000 }}>
                 <OrbitControls />
                 {/* <ambientLight intensity={0.5} /> */}

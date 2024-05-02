@@ -1,19 +1,31 @@
+"use client"
+
+import { TimelineDefinition, timeline } from "motion";
 
 export const NavList = () => {
 
-    // const list_items = ["about me", "my work", "contact"];
+    if (typeof document !== 'undefined') {
+        // will run in client's browser only
+        
+        const fade_in_sequence: TimelineDefinition = [
+            [".my-name", {opacity: [0,1]}, {duration: 1, at: 0.5}],
+            [".my-tagline", {opacity: [0,1]}, {duration: 1, at: 1.25}],
+            [".social-links", {opacity: [0,1]}, {duration: 1, at: 1.75}]
+        ];
+        timeline(fade_in_sequence);
+    }
 
     return (
         <div className="w-fit  items-center flex justify-center">
             <ul className="flex text-center items-center sm:text-start sm:items-start flex-col gap-2 text-base w-fit rounded-2xl h-full text-white ">
-                <li className="text-5xl font-semibold tracking-tight sm:text-[5rem]">
+                <li className="my-name text-5xl font-semibold tracking-tight sm:text-[5rem]">
                 Ron<span className="text-[#4e9fe9]"> Rounsifer</span>
                 </li>
 
-                <li className="text-white/85 font-light tracking-wide w-2/3 sm:w-full sm:text-start text-center italic">
+                <li className="my-tagline text-white/85 font-light tracking-wide w-2/3 sm:w-full sm:text-start text-center italic">
                     just another <span className="font-semibold text-white">software engineer</span> that likes to build things
                 </li>
-                <ul className="w-full flex flex-row gap-1 justify-center sm:justify-start">
+                <ul className="social-links w-full flex flex-row gap-1 justify-center sm:justify-start">
                     <li className="text-white/50">
                         <a href="https://github.com/rounsifer" target="_blank" rel="noopener noreferrer">
                             <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-brand-github mix-blend-exclusion" width="28" height="28" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#2c3e50" fill="none" strokeLinecap="round" strokeLinejoin="round">
