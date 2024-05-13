@@ -14,11 +14,22 @@ mat3 rotation3dY(float angle) {
   );
 }
 
+// Source: https://github.com/dmnsgn/glsl-rotate/blob/main/rotation-3d-x.glsl.js
+mat3 rotation3dX(float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  return mat3(
+    1.0, 0.0, 0.0,
+    0.0, c, s,
+    0.0, -s, c
+  );
+}
+
 
 void main() {
   float distanceFactor = pow(uRadius - distance(position, vec3(0.0)), 1.5);
   float size = distanceFactor * 10.0 + 10.0;
-  vec3 particlePosition = position * rotation3dY(uTime * 0.3 * distanceFactor);
+  vec3 particlePosition = position * rotation3dX(uTime * 0.3 * distanceFactor);
 
   vDistance = distanceFactor;
 

@@ -18,7 +18,7 @@ export const NavList = () => {
     return (
         <div className="w-fit  items-center flex justify-center">
             <ul className="flex text-center items-center sm:text-start sm:items-start flex-col gap-2 text-base w-fit rounded-2xl h-full text-white ">
-                <li className="my-name text-5xl font-semibold tracking-tight sm:text-[5rem]">
+                <li className="my-name text-5xl font-semibold tracking-tight sm:text-[3rem]">
                 Ron<span className="text-[#4e9fe9]"> Rounsifer</span>
                 </li>
 
