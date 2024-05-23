@@ -24,7 +24,7 @@ export const ParticleDisplay = () => {
     }
 
     return (
-        <main className="particle-display flex h-[200px]  w-[200px]">
+        <main className="particle-display items-center justify-center flex h-[200px]  w-[200px]">
             <Canvas className="flex " camera={{ position: [1.5, 1.5, 1.5], zoom: 4, near: 1, far: 1000 }}>
                 <OrbitControls />
                 {/* <ambientLight intensity={0.5} /> */}
