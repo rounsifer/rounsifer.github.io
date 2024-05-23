@@ -2,7 +2,6 @@
 import { CustomCursor } from "./_components/custom-cursor";
 import NavList from "./_components/homepage/nav-list";
 import { ParticleDisplay } from "./_components/homepage/particle-display/particle-display";
-import WelcomeScreen from "./_components/welcome-screen";
 import MainScreen from "./_components/main-screen";
 
 export default function Home() {
