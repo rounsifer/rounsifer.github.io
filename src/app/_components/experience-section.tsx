@@ -4,7 +4,7 @@ export default function Experience() {
   if (typeof document !== "undefined") {
     // will run in client's browser only
     const fade_in_sequence: TimelineDefinition = [
-      [".experience", { opacity: [0, 0.75] }, { duration: 1, at: 0 }],
+      [".experience", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
     timeline(fade_in_sequence);
   }
@@ -82,7 +82,7 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar flex w-full flex-row gap-4 text-white mix-blend-exclusion py-4">
+    <main className="experience no-scrollbar pr-24 flex w-full flex-row gap-4 text-zinc-300 mix-blend-exclusion py-24">
       <div className="flex h-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
@@ -117,15 +117,15 @@ type JobCardProps = {
 
 const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
   return (
-    <main className="job-card flex flex-row rounded-lg py-2 pr-1 opacity-75 hover:bg-[#4e9fe9]/5 hover:text-white hover:opacity-100">
-      <p className="h-fit w-1/4 pt-1 text-center text-xs font-semibold ">
+    <main className="job-card flex flex-row rounded-lg py-2 pr-1 hover:bg-[#4e9fe9]/5 hover:text-white">
+      <p className="h-fit w-1/4 pt-1 text-center text-xs font-semibold tracking-wide ">
         {date}
       </p>
       <div className="flex w-3/4 flex-col gap-3">
         <div className="flex flex-row items-center gap-2">
-          <p className="font-semibold">{title}</p>
-          {"-"}
-          <p className="text-sm  text-white/90">{company}</p>
+          <p className="font-semibold text-base">{title} </p>
+          {"·"}
+          <p className="text-base text-white/90">{company}</p>
         </div>
         <p className="text-sm tracking-wide">{detail}</p>
         <ul className="flex w-full flex-col gap-1.5">
@@ -136,7 +136,7 @@ const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
                   <p className="flex text-xs font-semibold text-white/85">
                     {project.title}
                   </p>
-                  <p className="flex text-xs text-white/85">
+                  <p className="flex text-white/85">
                     {project.description}
                   </p>
                   <ul className="flex w-full flex-wrap gap-2 text-end text-xs">
@@ -144,7 +144,8 @@ const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
                       return (
                         <li
                           key={index}
-                          className="rounded-full bg-white/5  px-2.5 py-1  text-white/75"
+                          className="rounded-full bg-[#6071e2]/10  px-3 py-1  text-white/75"
+                          
                         >
                           {tech}
                         </li>

@@ -24,14 +24,14 @@ export const ParticleDisplay = () => {
     }
 
     return (
-        <main className="particle-display items-center justify-center flex h-[200px]  w-[200px]">
+        <main className="particle-display items-center justify-center flex h-[300px]  w-[300px]">
             <Canvas className="flex " camera={{ position: [1.5, 1.5, 1.5], zoom: 4, near: 1, far: 1000 }}>
                 <OrbitControls />
                 {/* <ambientLight intensity={0.5} /> */}
                 {/* <directionalLight position={[-1, 2, 2]} intensity={4} /> */}
                 {/* <BasicParticles  /> */}
                 {/* <TwistedBox /> */}
-                <CustomGeometryParticles count={8000} />
+                <CustomGeometryParticles count={10000} />
             </Canvas>
 
         </main>
