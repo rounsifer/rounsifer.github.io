@@ -20,7 +20,7 @@ export default function MainScreen() {
         <NavList />
       </header>
 
-      <div className="right-col flex h-screen lg:w-1/2 overflow-y-scroll">
+      <div className="right-col flex h-screen lg:w-1/2 overflow-y-scroll no-scrollbar">
         <Experience />
       </div>
     </main>
