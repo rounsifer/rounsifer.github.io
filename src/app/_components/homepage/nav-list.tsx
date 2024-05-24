@@ -57,7 +57,9 @@ export default function NavList() {
           Ron Rounsifer
         </a>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
-
+        <p className="mt-4 flex max-w-xs leading-normal text-zinc-400">
+          I create high performant, mission-critical systems for all domains.
+        </p>
         <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white"></ul>
       </div>
 
