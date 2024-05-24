@@ -1,4 +1,4 @@
-import { type TimelineDefinition, timeline, inView, animate } from "motion";
+import { type TimelineDefinition, timeline } from "motion";
 
 export default function Experience() {
   if (typeof document !== "undefined") {
@@ -82,7 +82,7 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar pr-24 flex w-full flex-row gap-4 text-zinc-300 mix-blend-exclusion py-24">
+    <main className="experience no-scrollbar flex w-full flex-row gap-4 py-24 pr-24 text-zinc-300 mix-blend-exclusion">
       <div className="flex h-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
@@ -123,7 +123,7 @@ const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
       </p>
       <div className="flex w-3/4 flex-col gap-3">
         <div className="flex flex-row items-center gap-2">
-          <p className="font-semibold text-base">{title} </p>
+          <p className="text-base font-semibold">{title} </p>
           {"·"}
           <p className="text-base text-white/90">{company}</p>
         </div>
@@ -136,16 +136,13 @@ const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
                   <p className="flex text-xs font-semibold text-white/85">
                     {project.title}
                   </p>
-                  <p className="flex text-white/85">
-                    {project.description}
-                  </p>
+                  <p className="flex text-white/85">{project.description}</p>
                   <ul className="flex w-full flex-wrap gap-2 text-end text-xs">
                     {project.technology.map((tech, index) => {
                       return (
                         <li
                           key={index}
                           className="rounded-full bg-[#6071e2]/10  px-3 py-1  text-white/75"
-                          
                         >
                           {tech}
                         </li>

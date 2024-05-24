@@ -1,38 +1,34 @@
 "use client";
 
-import { TimelineDefinition, timeline } from "motion";
+import { type TimelineDefinition, timeline } from "motion";
 
 import { ParticleDisplay } from "./particle-display/particle-display";
 
-
-
-
-        // <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white">
-        //   <li className="mt-16 py-3 text-start">
-        //     <a
-        //       href="experience"
-        //       className="py-3 text-xs  font-bold uppercase tracking-widest text-zinc-500"
-        //     >
-        //       EXPERIENCE
-        //     </a>
-        //   </li>
-        //   <li className="py-3 text-start">
-        //     <a
-        //       href="education"
-        //       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
-        //     >
-        //       EDUCATION
-        //     </a>
-        //   </li>
-        //   <li className="py-3 text-start">
-        //     <a
-        //       href="#publications"
-        //       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
-        //     >
-        //       publications
-        //     </a>
-        //   </li>
-
+// <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white">
+//   <li className="mt-16 py-3 text-start">
+//     <a
+//       href="experience"
+//       className="py-3 text-xs  font-bold uppercase tracking-widest text-zinc-500"
+//     >
+//       EXPERIENCE
+//     </a>
+//   </li>
+//   <li className="py-3 text-start">
+//     <a
+//       href="education"
+//       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
+//     >
+//       EDUCATION
+//     </a>
+//   </li>
+//   <li className="py-3 text-start">
+//     <a
+//       href="#publications"
+//       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
+//     >
+//       publications
+//     </a>
+//   </li>
 
 export default function NavList() {
   if (typeof document !== "undefined") {
@@ -62,12 +58,10 @@ export default function NavList() {
         </a>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
 
-
-        <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white">
-        </ul>
+        <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white"></ul>
       </div>
 
-          <ParticleDisplay />
+      <ParticleDisplay />
       <ul className="social-links mt-8 flex w-full flex-row justify-start gap-6">
         <li className="text-zinc-500">
           <a
