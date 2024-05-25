@@ -49,7 +49,7 @@ export default function NavList() {
 
   return (
     <div className="navlist flex hidden h-full max-h-screen flex-col justify-between ">
-      <div className="flex pb-24 lg:hidden">
+      <div className="mb-24 flex lg:hidden">
         <ParticleDisplay />
       </div>
 
@@ -68,7 +68,7 @@ export default function NavList() {
         <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white"></ul>
       </div>
 
-      <div className="hidden lg:flex">
+      <div className="mt-24 hidden lg:flex">
         <ParticleDisplay />
       </div>
       <ul className="social-links mt-8 flex w-full flex-row justify-start gap-6">

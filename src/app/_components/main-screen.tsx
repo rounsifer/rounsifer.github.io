@@ -19,7 +19,7 @@ export default function MainScreen() {
         <NavList />
       </header>
 
-      <div className="right-col no-scrollbar flex h-full w-full items-center justify-center lg:h-screen lg:w-1/2 lg:overflow-y-scroll">
+      <div className="right-col flex h-full w-full lg:h-screen lg:w-1/2">
         <Experience />
       </div>
     </main>

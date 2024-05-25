@@ -33,7 +33,7 @@ export default function Experience() {
             "Embedded Linux",
             "Flask",
             "Python",
-            "JavaScript",
+            "Javascript",
           ],
         },
         {
@@ -75,15 +75,15 @@ export default function Experience() {
           title: "STOIC",
           description:
             "Designed and implemented UI in Python using matplotlib to display both the live data of nodes and post-processed data to researchers.",
-          technology: ["Python", "Matplotlib", "Data Viz"],
+          technology: ["Python", "Matplotlib", "Data Visualization"],
         },
       ],
     },
   ];
 
   return (
-    <main className="experience no-scrollbar flex w-3/4 flex-row items-center justify-center gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:py-24 lg:pr-24">
-      <div className="flex h-full w-full flex-col  justify-center gap-6">
+    <main className="experience no-scrollbar flex  h-full w-3/4 flex-row gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
+      <div className="flex w-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
             <JobCard
@@ -117,14 +117,14 @@ type JobCardProps = {
 
 const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
   return (
-    <main className=" job-card flex flex-row rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300">
+    <main className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300">
       <p className="h-fit w-1/4 pt-1 text-center text-xs font-semibold tracking-wide ">
         {date}
       </p>
       <div className="flex w-3/4 flex-col gap-3">
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-col md:flex-row md:items-center md:gap-2">
           <p className="text-base font-semibold ">{title} </p>
-          {"·"}
+          <span className="hidden md:flex">{"·"}</span>
           <p className="text-base">{company}</p>
         </div>
         <p className="text-sm leading-normal text-zinc-300">{detail}</p>
