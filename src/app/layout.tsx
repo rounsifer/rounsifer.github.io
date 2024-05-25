@@ -2,7 +2,6 @@ import "~/styles/globals.css";
 
 import { Inter } from "next/font/google";
 
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -21,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} cursor-none overflow-hidden`}>
+      <body
+        className={`font-sans ${inter.variable} no-scrollbar cursor-none overflow-x-hidden overflow-y-scroll lg:overflow-hidden`}
+      >
         {children}
       </body>
     </html>

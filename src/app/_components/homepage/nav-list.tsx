@@ -49,10 +49,14 @@ export default function NavList() {
 
   return (
     <div className="navlist flex hidden h-full max-h-screen flex-col justify-between ">
+      <div className="flex pb-24 lg:hidden">
+        <ParticleDisplay />
+      </div>
+
       <div className="flex  w-fit flex-col gap-2 rounded-2xl  text-white">
         <a
           href="/"
-          className="my-name font-bold tracking-tight text-zinc-300 sm:text-4xl sm:text-5xl"
+          className="my-name text-4xl font-bold tracking-tight text-zinc-300 sm:text-5xl"
         >
           Ron Rounsifer
         </a>
@@ -64,7 +68,9 @@ export default function NavList() {
         <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white"></ul>
       </div>
 
-      <ParticleDisplay />
+      <div className="hidden lg:flex">
+        <ParticleDisplay />
+      </div>
       <ul className="social-links mt-8 flex w-full flex-row justify-start gap-6">
         <li className="text-zinc-500">
           <a

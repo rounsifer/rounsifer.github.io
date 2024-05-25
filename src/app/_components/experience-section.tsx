@@ -82,8 +82,8 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar flex w-full flex-row gap-4 py-24 pr-24 text-zinc-300 mix-blend-exclusion">
-      <div className="flex h-full flex-col gap-6">
+    <main className="experience no-scrollbar flex w-3/4 flex-row items-center justify-center gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:py-24 lg:pr-24">
+      <div className="flex h-full w-full flex-col  justify-center gap-6">
         {jobHistory.map((job) => {
           return (
             <JobCard

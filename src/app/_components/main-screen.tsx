@@ -14,12 +14,12 @@ export default function MainScreen() {
   }
 
   return (
-    <main className="flex h-full max-w-screen-xl flex-row justify-between">
+    <main className="flex h-full max-w-screen-xl flex-col  items-center justify-between lg:flex-row lg:items-start">
       <header className="left-col flex w-full flex-col items-center gap-4 py-24 lg:sticky lg:max-h-screen lg:w-1/2">
         <NavList />
       </header>
 
-      <div className="right-col no-scrollbar flex h-screen overflow-y-scroll lg:w-1/2">
+      <div className="right-col no-scrollbar flex h-full w-full items-center justify-center lg:h-screen lg:w-1/2 lg:overflow-y-scroll">
         <Experience />
       </div>
     </main>
