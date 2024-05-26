@@ -84,7 +84,10 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar flex  h-full w-3/4 flex-row gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
+    <main className="experience no-scrollbar flex  h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
+      <h1 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
+        experience
+      </h1>
       <div className="flex w-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
@@ -134,7 +137,7 @@ const JobCard = ({
       rel="noopener noreferrer"
       className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300"
     >
-      <p className="h-fit w-1/4 pt-1 text-center text-xs font-semibold tracking-wide ">
+      <p className="h-fit w-1/4 pt-1 text-xs font-semibold tracking-wide lg:text-center ">
         {date}
       </p>
       <div className="flex w-3/4 flex-col gap-3">
