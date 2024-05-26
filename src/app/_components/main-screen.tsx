@@ -15,7 +15,7 @@ export default function MainScreen() {
 
   return (
     <main className="flex h-full max-w-screen-xl flex-col  items-center justify-between lg:flex-row lg:items-start">
-      <header className="left-col flex w-full flex-col items-center gap-4 py-24 lg:sticky lg:max-h-screen lg:w-1/2">
+      <header className="left-col flex w-full flex-col items-center gap-4 py-12 lg:sticky lg:max-h-screen lg:w-1/2 lg:py-24">
         <NavList />
       </header>
 

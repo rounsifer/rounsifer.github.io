@@ -14,6 +14,7 @@ export default function Experience() {
       id: "0",
       title: "Research Engineer, II",
       company: "Raytheon",
+      url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
       date: "2022 - PRESENT",
       details:
         "Developed cross-platform and embedded software for advanced research and development projects.",
@@ -55,6 +56,7 @@ export default function Experience() {
       id: "1",
       title: "Associate Scientist",
       company: "Raytheon",
+      url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
       date: "2019 - 2022",
       details:
         "Developed cross-platform and embedded software for advanced research and development projects.",
@@ -90,6 +92,7 @@ export default function Experience() {
               key={job.id}
               title={job.title}
               company={job.company}
+              url={job.url}
               date={job.date}
               detail={job.details}
               projects={job.projects}
@@ -110,14 +113,27 @@ type ProjectType = {
 type JobCardProps = {
   title: string;
   company: string;
+  url: string;
   date: string;
   detail: string;
   projects: ProjectType[];
 };
 
-const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
+const JobCard = ({
+  title,
+  company,
+  url,
+  date,
+  detail,
+  projects,
+}: JobCardProps) => {
   return (
-    <main className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300">
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300"
+    >
       <p className="h-fit w-1/4 pt-1 text-center text-xs font-semibold tracking-wide ">
         {date}
       </p>
@@ -153,6 +169,6 @@ const JobCard = ({ title, company, date, detail, projects }: JobCardProps) => {
           })}
         </ul>
       </div>
-    </main>
+    </a>
   );
 };

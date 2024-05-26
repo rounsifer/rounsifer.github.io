@@ -49,7 +49,7 @@ export default function NavList() {
 
   return (
     <div className="navlist flex hidden h-full max-h-screen flex-col justify-between ">
-      <div className="mb-24 flex lg:hidden">
+      <div className="mb-12 flex lg:mb-24 lg:hidden">
         <ParticleDisplay />
       </div>
 
@@ -61,17 +61,16 @@ export default function NavList() {
           Ron Rounsifer
         </a>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
-        <p className="mt-4  max-w-xs leading-normal text-zinc-400">
+        <p className="mt-2 max-w-xs  leading-normal text-zinc-400 lg:mt-4">
           I design and build highly performant, mission-critical systems for all
           domains.
         </p>
-        <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white"></ul>
       </div>
 
       <div className="mt-24 hidden lg:flex">
         <ParticleDisplay />
       </div>
-      <ul className="social-links mt-8 flex w-full flex-row justify-start gap-6">
+      <ul className="social-links mt-4 flex w-full flex-row justify-start gap-6 lg:mt-8">
         <li className="text-zinc-500">
           <a
             href="https://github.com/rounsifer"
