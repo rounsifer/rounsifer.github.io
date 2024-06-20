@@ -36,7 +36,7 @@ export default function Experience() {
             "Flask",
             "Javascript",
             "HTML",
-            "CSs"
+            "CSS"
           ],
         },
         {
