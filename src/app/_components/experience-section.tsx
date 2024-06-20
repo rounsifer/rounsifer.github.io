@@ -15,7 +15,7 @@ export default function Experience() {
       title: "Research Engineer, II",
       company: "Raytheon",
       url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
-      date: "2022 - PRESENT",
+      date: "2022 - 2024",
       details:
         "Developed cross-platform and embedded software for advanced research and development projects.",
       projects: [
