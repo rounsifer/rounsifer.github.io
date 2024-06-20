@@ -20,33 +20,36 @@ export default function Experience() {
         "Developed cross-platform and embedded software for advanced research and development projects.",
       projects: [
         {
-          title: "AORTA",
+          title: "AORTA/RIPL",
           description:
-            "Designed and implemented a generic filter interface in C++ to allow other research engineers to retain, drop, or propagate control/data messages throughout the network.",
-          technology: ["C++", "Embedded"],
+            "Designed and implemented a generic filter interface in C++ to allow other researchers to retain, drop, or propagate control/data messages throughout the network while using CTest for unit testing and Kubernetes to build a cluster to run across distributed computing environments.",
+          technology: ["C++", "Kubernetes", "CTest", "Embedded"],
         },
         {
           title: "MOA",
           description:
-            "Designed and implemented updates to the AngularJS frontend and the Flask REST API to extend field unit capabilities for end users.",
+          "Designed and implemented updates to the AngularJS frontend using HTML, CSS, JavaScript and the Python Flask REST API to extend field unit capabilities for end users.",
           technology: [
             "AngularJS",
             "Embedded Linux",
-            "Flask",
             "Python",
+            "Flask",
             "Javascript",
+            "HTML",
+            "CSs"
           ],
         },
         {
           title: "DARPA COHO",
           description:
-            "Designed and implemented both the container architecture for RF engine using Python and Docker and the experimental system user interface in Typescript.",
+          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in Typescript leveraging React and Tailwind.",
           technology: [
             "Python",
             "Typescript",
             "Docker",
             "ZMQ",
             "Redis",
+            "React",
             "TailwindCSS",
           ],
         },
@@ -62,29 +65,29 @@ export default function Experience() {
         "Developed cross-platform and embedded software for advanced research and development projects.",
       projects: [
         {
+          title: "STOIC",
+          description:
+            "Designed and implemented the data visualization libraries used to observe the behavior of our state-of-the-art positioning, navigation, and timing (PNT) algorithms using Python and Matplotlib for real-time experiments as well as post-processing data analysis.",
+          technology: ["Python", "Matplotlib", "Data Visualization"],
+        },
+        {
           title: "DARPA ASTARTE",
           description:
-            "Designed and implemented an interface to allow communication from new sensor hardware to subscribed nodes on the network in Java.",
-          technology: ["Java", "Networking"],
+          "Designed and implemented an interface to allow communication from new sensor hardware to subscribed nodes on the network in Java using Maven, Eclipse, and JUnit for unit tests.",
+          technology: ["Java", "Networking", "Maven", "Eclipse", "JUnit"],
         },
         {
           title: "DARPA Ground Truth",
           description:
-            "Implemented scenarios to other researcher’s specifications in Java and generated reports to summarize simulation behavior during these runs using a custom-built testing library in Python.",
-          technology: ["Java", "Python", "OOP"],
-        },
-        {
-          title: "STOIC",
-          description:
-            "Designed and implemented UI in Python using matplotlib to display both the live data of nodes and post-processed data to researchers.",
-          technology: ["Python", "Matplotlib", "Data Visualization"],
+            "Implemented scenarios to other researcher’s specifications in Java using Eclipse, Maven, and JUnit while also writing custom scripts in Python to generate reports to summarize simulation behavior after a completed run.",
+          technology: ["Java", "Python", "OOP", "Maven", "Eclipse", "JUnit"],
         },
       ],
     },
   ];
 
   return (
-    <main className="experience no-scrollbar flex  h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
+    <main className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
       <h1 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
         experience
       </h1>
