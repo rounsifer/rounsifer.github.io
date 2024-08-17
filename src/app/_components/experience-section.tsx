@@ -10,8 +10,19 @@ export default function Experience() {
   }
 
   const jobHistory = [
+
     {
       id: "0",
+      title: "Senior Software Engineer",
+      company: "Medtronic",
+      url: "https://www.medtronic.com/us-en/healthcare-professionals/therapies-procedures/cardiovascular/renal-denervation.html",
+      date: "2024 - Present",
+      details:
+        "Developed cross-platform and embedded software for the Coronary and Renal Denervation R&D group.",
+      projects: [],
+    },
+    {
+      id: "1",
       title: "Research Engineer, II",
       company: "Raytheon",
       url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
@@ -56,7 +67,7 @@ export default function Experience() {
       ],
     },
     {
-      id: "1",
+      id: "2",
       title: "Associate Scientist",
       company: "Raytheon",
       url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
