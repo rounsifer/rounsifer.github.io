@@ -3,32 +3,7 @@
 import { type TimelineDefinition, timeline } from "motion";
 
 import { ParticleDisplay } from "./particle-display/particle-display";
-
-// <ul className="flex  w-fit flex-col gap-2 rounded-2xl text-center text-white">
-//   <li className="mt-16 py-3 text-start">
-//     <a
-//       href="experience"
-//       className="py-3 text-xs  font-bold uppercase tracking-widest text-zinc-500"
-//     >
-//       EXPERIENCE
-//     </a>
-//   </li>
-//   <li className="py-3 text-start">
-//     <a
-//       href="education"
-//       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
-//     >
-//       EDUCATION
-//     </a>
-//   </li>
-//   <li className="py-3 text-start">
-//     <a
-//       href="#publications"
-//       className="text-xs font-bold uppercase tracking-widest text-zinc-500"
-//     >
-//       publications
-//     </a>
-//   </li>
+import Link from "next/link";
 
 export default function NavList() {
   if (typeof document !== "undefined") {
@@ -65,12 +40,32 @@ export default function NavList() {
           I design and build highly performant, mission-critical systems for all
           domains.
         </p>
+
+        
+
       </div>
 
-      <div className="mt-24 hidden lg:flex">
+      <div className=" mt-10 pt-5 pb-5 rounded-t-lg p-10 hidden lg:flex bg-slate-800/10 border-zinc-800 border">
         <ParticleDisplay />
       </div>
-      <ul className="social-links mt-4 flex w-full flex-row justify-start gap-6 lg:mt-8">
+      
+      <div className="flex flex-row justify-between px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/50 w-full">
+
+<a href={"https://ieeexplore.ieee.org/author/37087008577"} target="_blank" rel="noreferrer" className="hover:text-white hover:scale-105">
+  publications
+</a>
+-
+<Link href={""} className="hover:text-white hover:scale-105">
+  algorithms
+</Link>
+-
+<Link href={""} className="hover:text-white hover:scale-105">
+  system design
+</Link>
+
+
+</div>
+      <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">
         <li className="text-zinc-500">
           <a
             href="https://github.com/rounsifer"
