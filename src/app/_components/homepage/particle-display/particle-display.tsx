@@ -20,10 +20,10 @@ const RADIUS = 0.45;
 const MORPH_SECONDS = 1.6;
 const CYCLE_MS = 4200;
 
-// --- Background tuning knobs (safe to change by number; no WebGL needed) ---
-const COUNT = 20000; // particle count — higher = denser, bigger-feeling shapes
-const CAMERA_ZOOM = 3.0; // higher = the shape fills more of the screen
-const BG_OPACITY = 0.6; // overall background subtlety (readability vs presence)
+// --- Background tuning knobs (safe to change by number) ---
+const COUNT = 65000; // particle count — higher = denser, bigger-feeling shapes
+const CAMERA_ZOOM = 4.0; // higher = the shape fills more of the screen
+const BG_OPACITY = 0.9; // overall background presence (readability vs presence)
 const AUTO_ROTATE = 0.12; // radians/sec the field slowly spins
 
 type Build = (count: number) => Float32Array;
