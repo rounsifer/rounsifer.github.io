@@ -51,8 +51,8 @@ const browser = await chromium.launch({
 
 const FATAL = /ReactCurrentBatchConfig|is not defined|Cannot read prop/i;
 
-async function check(label, { reducedMotion }) {
-  const page = await browser.newPage();
+async function check(label, { reducedMotion, viewport, shot }) {
+  const page = await browser.newPage(viewport ? { viewport } : undefined);
   if (reducedMotion) await page.emulateMedia({ reducedMotion: "reduce" });
 
   const consoleErrors = [];
@@ -72,7 +72,7 @@ async function check(label, { reducedMotion }) {
     .isVisible()
     .catch(() => false);
 
-  if (!reducedMotion) await page.screenshot({ path: "/tmp/smoke.png", fullPage: true });
+  if (shot) await page.screenshot({ path: shot, fullPage: true });
   await page.close();
 
   const fatal =
@@ -87,11 +87,29 @@ async function check(label, { reducedMotion }) {
   return !fatal;
 }
 
-const okDefault = await check("default motion", { reducedMotion: false });
-const okReduced = await check("reduced motion", { reducedMotion: true });
+const desktop = { width: 1280, height: 800 };
+const mobile = { width: 390, height: 844 };
+
+const results = [
+  await check("default motion (desktop)", {
+    reducedMotion: false,
+    viewport: desktop,
+    shot: "/tmp/smoke-desktop.png",
+  }),
+  await check("reduced motion (desktop)", {
+    reducedMotion: true,
+    viewport: desktop,
+  }),
+  await check("default motion (mobile)", {
+    reducedMotion: false,
+    viewport: mobile,
+    shot: "/tmp/smoke-mobile.png",
+  }),
+];
 
 await browser.close();
 await new Promise((r) => server.close(r));
 
-console.log("=== SMOKE RESULT:", okDefault && okReduced ? "PASS" : "FAIL", "===");
-process.exit(okDefault && okReduced ? 0 : 1);
+const pass = results.every(Boolean);
+console.log("=== SMOKE RESULT:", pass ? "PASS" : "FAIL", "===");
+process.exit(pass ? 0 : 1);
