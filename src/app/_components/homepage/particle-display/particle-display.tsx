@@ -1,5 +1,4 @@
 "use client";
-import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -20,6 +19,12 @@ import fragmentShader from "./shaders/fragmentShader.glsl";
 const RADIUS = 0.45;
 const MORPH_SECONDS = 1.6;
 const CYCLE_MS = 4200;
+
+// --- Background tuning knobs (safe to change by number; no WebGL needed) ---
+const COUNT = 20000; // particle count — higher = denser, bigger-feeling shapes
+const CAMERA_ZOOM = 3.0; // higher = the shape fills more of the screen
+const BG_OPACITY = 0.6; // overall background subtlety (readability vs presence)
+const AUTO_ROTATE = 0.12; // radians/sec the field slowly spins
 
 type Build = (count: number) => Float32Array;
 
@@ -412,6 +417,8 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     const dt = Math.min(delta, 0.05);
     const uTime = points.current?.material.uniforms.uTime;
     if (uTime) uTime.value = state.clock.elapsedTime;
+    // Slow auto-spin (replaces OrbitControls autoRotate for the non-interactive bg).
+    if (points.current) points.current.rotation.y += dt * AUTO_ROTATE;
 
     if (m.theme !== theme || m.idx !== idx) {
       m.from.set(arr);
@@ -445,14 +452,19 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
   );
 };
 
-export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
+/**
+ * Full-bleed ambient particle field rendered behind all page content.
+ * Non-interactive (pointer-events: none) so the page scrolls/clicks normally;
+ * it auto-cycles shapes and morphs to a company theme when an experience card
+ * is hovered/focused (via ParticleThemeProvider).
+ */
+export const ParticleBackground = ({ count = COUNT }: { count?: number }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const { theme: ctxTheme } = useParticleTheme();
   const theme: ThemeKey = ctxTheme ?? "default";
-  const shapes = THEMES[theme];
   const [active, setActive] = useState(0);
 
-  // Auto-cycle within the current theme; a manual pick resets the timer.
+  // Auto-cycle through the active theme's shapes.
   useEffect(() => {
     if (prefersReducedMotion) return;
     const len = THEMES[theme].length;
@@ -460,67 +472,37 @@ export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
     return () => clearInterval(id);
   }, [prefersReducedMotion, active, theme]);
 
+  // Gentle fade-in to the background opacity.
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const fade_in_sequence: AnimationSequence = [
-      [".particle-display", { opacity: [0, 1] }, { duration: 4, at: 0 }],
+    const fade: AnimationSequence = [
+      [".particle-bg", { opacity: [0, BG_OPACITY] }, { duration: 3, at: 0 }],
     ];
-    void animate(fade_in_sequence);
+    void animate(fade);
   }, [prefersReducedMotion]);
 
-  const activeIdx = active % shapes.length;
-
   return (
-    <div className="flex w-full flex-col items-center gap-3">
-      <div
-        aria-hidden="true"
-        title="Drag to rotate · scroll to zoom · click to change shape"
-        onClick={() => setActive((a) => (a + 1) % THEMES[theme].length)}
-        className="particle-display flex aspect-square w-full max-w-[320px] items-center justify-center lg:max-w-[420px]"
+    <div
+      aria-hidden="true"
+      style={{ opacity: BG_OPACITY }}
+      className="particle-bg pointer-events-none fixed inset-0 -z-10"
+    >
+      <Canvas
+        camera={{
+          position: [1.5, 1.5, 1.5],
+          fov: 50,
+          near: 0.1,
+          far: 100,
+          zoom: CAMERA_ZOOM,
+        }}
       >
-        <Canvas
-          camera={{ position: [1.5, 1.5, 1.5], fov: 50, near: 0.1, far: 100, zoom: 2.4 }}
-        >
-          <OrbitControls
-            makeDefault
-            enablePan={false}
-            enableZoom
-            minDistance={1.2}
-            maxDistance={5}
-            enableDamping
-            autoRotate={!prefersReducedMotion}
-            autoRotateSpeed={0.6}
-          />
-          <MorphingParticles
-            count={count}
-            theme={theme}
-            active={active}
-            reducedMotion={prefersReducedMotion}
-          />
-        </Canvas>
-      </div>
-
-      <div
-        role="group"
-        aria-label="Particle shape"
-        className="flex flex-wrap justify-center gap-1.5"
-      >
-        {shapes.map((s, i) => (
-          <button
-            key={s.name}
-            type="button"
-            onClick={() => setActive(i)}
-            aria-pressed={activeIdx === i}
-            className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-              activeIdx === i
-                ? "bg-[#5786F5]/30 text-white"
-                : "bg-[#6071e2]/10 text-zinc-400 hover:text-white"
-            }`}
-          >
-            {s.name}
-          </button>
-        ))}
-      </div>
+        <MorphingParticles
+          count={count}
+          theme={theme}
+          active={active}
+          reducedMotion={prefersReducedMotion}
+        />
+      </Canvas>
     </div>
   );
 };
