@@ -1,25 +1,34 @@
 "use client";
 
-import { type TimelineDefinition, timeline } from "motion";
+import { animate, type AnimationSequence } from "motion";
 
-import { ParticleDisplay } from "./particle-display/particle-display";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+// The Three.js <Canvas> relies on react-reconciler, which can't be server-rendered
+// during Next's static export (it reads React internals that are undefined on the
+// server). Load it browser-only so the rest of the page still prerenders.
+const ParticleDisplay = dynamic(
+  () =>
+    import("./particle-display/particle-display").then((m) => m.ParticleDisplay),
+  { ssr: false },
+);
 
 export default function NavList() {
   if (typeof document !== "undefined") {
     // will run in client's browser only
 
-    const fade_in_sequence: TimelineDefinition = [
+    const fade_in_sequence: AnimationSequence = [
       [".navlist", { display: "flex" }],
     ];
-    timeline(fade_in_sequence);
+    animate(fade_in_sequence);
 
-    const fade_in_sequence_2: TimelineDefinition = [
+    const fade_in_sequence_2: AnimationSequence = [
       [".my-name", { opacity: [0, 1] }, { duration: 1, at: 0 }],
       [".my-tagline", { opacity: [0, 1] }, { duration: 1, at: 0 }],
       [".social-links", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    timeline(fade_in_sequence_2);
+    animate(fade_in_sequence_2);
   }
 
   return (
