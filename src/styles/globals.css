@@ -1,16 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* next/font exposes Inter as --font-inter; map it to the font-sans utility. */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
 
-@layer utilities {
-      /* Hide scrollbar for Chrome, Safari and Opera */
-      .no-scrollbar::-webkit-scrollbar {
-          display: none;
-      }
-     /* Hide scrollbar for IE, Edge and Firefox */
-      .no-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-    }
+/* Custom glow used by the cursor (drop-shadow-glow utility). */
+@theme {
+  --drop-shadow-glow: 0 0 20px rgba(255, 255, 255, 0.35),
+    0 0 65px rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbar for Chrome, Safari, Opera, IE, Edge and Firefox */
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
   }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
