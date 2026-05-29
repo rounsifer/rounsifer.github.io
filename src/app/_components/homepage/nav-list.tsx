@@ -51,19 +51,11 @@ export default function NavList() {
       {/* Single particle canvas kept in one stable DOM position (so its WebGL
           context never remounts): shown up top on mobile via order-first, and
           inside the framed box on desktop. */}
-      <div className="order-first mb-12 flex justify-center lg:order-none lg:mb-0 lg:mt-10 lg:rounded-t-lg lg:border lg:border-zinc-800 lg:bg-slate-800/10 lg:p-4">
+      {/* Single particle canvas kept in one stable DOM position (so its WebGL
+          context never remounts): shown up top on mobile via order-first, and
+          inside the framed card on desktop. */}
+      <div className="order-first mb-12 flex justify-center lg:order-none lg:mb-0 lg:mt-10 lg:rounded-lg lg:border lg:border-zinc-800 lg:bg-slate-800/10 lg:p-4">
         <ParticleDisplay />
-      </div>
-
-      <div className="flex flex-row justify-center px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/75 w-full">
-        <a
-          href={"https://ieeexplore.ieee.org/author/37087008577"}
-          target="_blank"
-          rel="noreferrer"
-          className="hover:text-white hover:scale-105"
-        >
-          publications
-        </a>
       </div>
 
       <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">
@@ -135,6 +127,37 @@ export default function NavList() {
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M22 7.535v9.465a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-9.465l9.445 6.297l.116 .066a1 1 0 0 0 .878 0l.116 -.066l9.445 -6.297z" />
               <path d="M19 4c1.08 0 2.027 .57 2.555 1.427l-9.555 6.37l-9.555 -6.37a2.999 2.999 0 0 1 2.354 -1.42l.201 -.007h14z" />
+            </svg>
+          </a>
+        </li>
+
+        <li className="text-zinc-400">
+          <a
+            href="https://ieeexplore.ieee.org/author/37087008577"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Publications (IEEE)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-file-text"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+              <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+              <path d="M9 9l1 0" />
+              <path d="M9 13l6 0" />
+              <path d="M9 17l6 0" />
             </svg>
           </a>
         </li>
