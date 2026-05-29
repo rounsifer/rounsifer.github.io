@@ -12,7 +12,7 @@ void main() {
   vec3 dir = normalize(position + vec3(1e-4));
   vec3 particlePosition = position + dir * sin(uTime * 1.5 + d * 14.0) * 0.012;
 
-  float size = distanceFactor * 16.0 + 9.0;
+  float size = distanceFactor * 12.0 + 7.0;
 
   vDistance = distanceFactor;
 
