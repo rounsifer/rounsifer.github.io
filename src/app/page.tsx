@@ -9,7 +9,7 @@ export default function Home() {
     <CustomCursor>
       <ParticleThemeProvider>
         <ParticleBackground />
-        <main className="min-w-screen flex min-h-screen flex-row justify-center text-white mix-blend-exclusion">
+        <main className="min-w-screen flex min-h-screen flex-row justify-center text-white">
           <MainScreen />
         </main>
       </ParticleThemeProvider>

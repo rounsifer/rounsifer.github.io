@@ -134,7 +134,7 @@ export default function Experience() {
       id="experience"
       tabIndex={-1}
       aria-label="Experience"
-      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
+      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
     >
       <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-400 lg:sr-only">
         experience
