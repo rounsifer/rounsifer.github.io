@@ -5,10 +5,12 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Custom glow used by the cursor (drop-shadow-glow utility). */
-@theme {
-  --drop-shadow-glow: 0 0 20px rgba(255, 255, 255, 0.35),
-    0 0 65px rgba(255, 255, 255, 0.2);
+/* Custom glow used by the cursor. A v4 --drop-shadow-* theme token collapses
+   into a single drop-shadow() (invalid with two shadows), so emit the two
+   stacked filters directly as a utility instead. */
+@utility drop-shadow-glow {
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.35))
+    drop-shadow(0 0 65px rgba(255, 255, 255, 0.2));
 }
 
 /* Hide scrollbar for Chrome, Safari, Opera, IE, Edge and Firefox */
@@ -18,4 +20,30 @@
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Hide the native cursor only on mouse-driven devices, where the custom
+   cursor takes over. Touch and keyboard contexts keep the native cursor. */
+@media (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}
+
+/* Visible keyboard focus indicator (Preflight removes the default outline). */
+:focus-visible {
+  outline: 2px solid #5786f5;
+  outline-offset: 2px;
+}
+
+/* Honor reduced-motion as a final safety net for any CSS animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

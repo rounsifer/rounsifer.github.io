@@ -1,7 +1,7 @@
 // Headless smoke test for the static export in ./out
-// Serves out/ on a local port, loads it in chromium, and reports
-// console errors / uncaught page errors + writes a screenshot.
-// Exit code 1 if any page error or console "error" is seen.
+// Serves out/ on a local port, loads it in chromium under both default and
+// reduced-motion preferences, and fails on any console/page error or if the
+// page renders no visible content. Writes a screenshot of the default run.
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { join, extname, normalize } from "node:path";
@@ -30,7 +30,6 @@ const server = createServer(async (req, res) => {
     try {
       if ((await stat(filePath)).isDirectory()) filePath = join(filePath, "index.html");
     } catch {
-      // try .html fallback for extensionless routes
       if (!extname(filePath)) filePath += ".html";
     }
     const body = await readFile(filePath);
@@ -44,36 +43,98 @@ const server = createServer(async (req, res) => {
 
 await new Promise((r) => server.listen(PORT, r));
 
-const browser = await chromium.launch();
-const page = await browser.newPage();
-const consoleErrors = [];
-const pageErrors = [];
-page.on("console", (m) => {
-  if (m.type() === "error") consoleErrors.push(m.text());
+// --enable-unsafe-swiftshader lets WebGL run via software rendering on
+// GPU-less CI runners (GitHub Actions), so the Three.js canvas still mounts.
+const browser = await chromium.launch({
+  args: ["--enable-unsafe-swiftshader"],
 });
-page.on("pageerror", (e) => pageErrors.push(e.message));
 
-await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
-// give the dynamically-imported Three.js canvas time to mount
-await page.waitForTimeout(3000);
+// Console errors that are expected noise on a GPU-less SwiftShader runner or
+// from static-export quirks — everything else is treated as fatal.
+const BENIGN =
+  /favicon|swiftshader|software webgl|performance caveat|automatic fallback|GroupMarkerNotSet|Failed to load resource.*404/i;
 
-const canvasCount = await page.locator("canvas").count();
-const nameVisible = await page
-  .getByText("Ron Rounsifer")
-  .first()
-  .isVisible()
-  .catch(() => false);
+async function check(label, { reducedMotion, viewport, shot }) {
+  const page = await browser.newPage(viewport ? { viewport } : undefined);
+  if (reducedMotion) await page.emulateMedia({ reducedMotion: "reduce" });
 
-await page.screenshot({ path: "/tmp/smoke.png", fullPage: true });
+  const consoleErrors = [];
+  const pageErrors = [];
+  page.on("console", (m) => {
+    if (m.type() === "error") consoleErrors.push(m.text());
+  });
+  page.on("pageerror", (e) => pageErrors.push(e.message));
+
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(reducedMotion ? 1500 : 3000);
+
+  const canvasCount = await page.locator("canvas").count();
+  const nameVisible = await page
+    .getByText("Ron Rounsifer")
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  // The <canvas> mounts even when WebGL fails, so assert a live, non-lost
+  // WebGL context rather than just the element's presence.
+  const glHealthy = await page.evaluate(() => {
+    const c = document.querySelector("canvas");
+    if (!c) return false;
+    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    return !!gl && !gl.isContextLost();
+  });
+
+  // Show the custom cursor and confirm its glow filter actually renders
+  // (a broken drop-shadow token collapses to filter: none).
+  await page.mouse.move(120, 120);
+  await page.mouse.move(220, 240);
+  const cursorFilter = await page.evaluate(() => {
+    const el = document.querySelector(".custom-cursor");
+    return el ? getComputedStyle(el).filter : "missing";
+  });
+  const cursorGlowOk = cursorFilter !== "none" && cursorFilter !== "missing";
+
+  if (shot) await page.screenshot({ path: shot, fullPage: true });
+  await page.close();
+
+  const badConsole = consoleErrors.filter((e) => !BENIGN.test(e));
+  const fatal =
+    pageErrors.length > 0 ||
+    badConsole.length > 0 ||
+    !nameVisible ||
+    !glHealthy ||
+    !cursorGlowOk;
+
+  console.log(`--- ${label} ---`);
+  console.log("name visible:", nameVisible, "| canvas:", canvasCount, "| glHealthy:", glHealthy, "| cursorGlow:", cursorGlowOk);
+  console.log("pageErrors:", pageErrors.length ? pageErrors : "none");
+  console.log("console errors (non-benign):", badConsole.length ? badConsole : "none");
+  return !fatal;
+}
+
+const desktop = { width: 1280, height: 800 };
+const mobile = { width: 390, height: 844 };
+
+const results = [
+  await check("default motion (desktop)", {
+    reducedMotion: false,
+    viewport: desktop,
+    shot: "/tmp/smoke-desktop.png",
+  }),
+  await check("reduced motion (desktop)", {
+    reducedMotion: true,
+    viewport: desktop,
+  }),
+  await check("default motion (mobile)", {
+    reducedMotion: false,
+    viewport: mobile,
+    shot: "/tmp/smoke-mobile.png",
+  }),
+];
 
 await browser.close();
 await new Promise((r) => server.close(r));
 
-console.log("=== SMOKE RESULT ===");
-console.log("name 'Ron Rounsifer' visible:", nameVisible);
-console.log("canvas elements:", canvasCount);
-console.log("pageErrors:", pageErrors.length ? pageErrors : "none");
-console.log("consoleErrors:", consoleErrors.length ? consoleErrors : "none");
-
-const fatal = pageErrors.length > 0 || consoleErrors.some((e) => /ReactCurrentBatchConfig|is not defined|Cannot read prop/i.test(e));
-process.exit(fatal ? 1 : 0);
+const pass = results.every(Boolean);
+console.log("=== SMOKE RESULT:", pass ? "PASS" : "FAIL", "===");
+process.exit(pass ? 0 : 1);

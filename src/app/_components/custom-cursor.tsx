@@ -1,29 +1,52 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useRef, useState } from "react";
 
-export const CustomCursor = ({
-    children,
-}: {
-    children: React.ReactNode;
-}) => {
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isVisible, setIsVisible] = useState(false);
+const CURSOR_SIZE = 25;
 
-    // Update cursor position on mouse move
-    const updateCursorPosition = (e: React.MouseEvent) => {
-        setPosition({ x: e.pageX - 12.5, y: e.pageY - 12.5 });
+export const CustomCursor = ({ children }: { children: React.ReactNode }) => {
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const onMove = (e: MouseEvent) => {
+      // Reveal on first movement; setState is a no-op once already visible.
+      setIsVisible(true);
+      // Move the cursor via a ref + rAF so pointer movement never triggers a
+      // React re-render of the wrapped app subtree.
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const el = cursorRef.current;
+        if (el) {
+          const offset = CURSOR_SIZE / 2;
+          el.style.transform = `translate(${e.pageX - offset}px, ${e.pageY - offset}px)`;
+        }
+      });
     };
+    const hide = () => setIsVisible(false);
 
-    if (typeof window !== 'undefined') {
+    window.addEventListener("mousemove", onMove);
+    // mouseleave does not bubble, so this fires only when leaving the document.
+    document.documentElement.addEventListener("mouseleave", hide);
 
-        document.body.addEventListener("mouseout", () => { setIsVisible(false) });
-        document.body.addEventListener("mouseover", () => { setIsVisible(true) });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("mousemove", onMove);
+      document.documentElement.removeEventListener("mouseleave", hide);
+    };
+  }, []);
 
-    }
-
-    return (
-        <div className={`custom-cursor-container`} onMouseMove={updateCursorPosition}>
-            <div className={`custom-cursor drop-shadow-glow absolute bg-zinc-300 w-[25px] h-[25px] rounded-full mix-blend-difference ${isVisible ? "opacity-100" : "opacity-0"}`} style={{ left: `${position.x}px`, top: `${position.y}px` }}></div>
-            {children}
-        </div>
-    );
+  return (
+    <div className="custom-cursor-container">
+      <div
+        ref={cursorRef}
+        aria-hidden="true"
+        className={`custom-cursor drop-shadow-glow pointer-events-none absolute left-0 top-0 h-[25px] w-[25px] rounded-full bg-zinc-300 mix-blend-difference ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      {children}
+    </div>
+  );
 };

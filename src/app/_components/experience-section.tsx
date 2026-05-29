@@ -1,13 +1,19 @@
+"use client";
+import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
+import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+
 export default function Experience() {
-  if (typeof document !== "undefined") {
-    // will run in client's browser only
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
     const fade_in_sequence: AnimationSequence = [
       [".experience", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    animate(fade_in_sequence);
-  }
+    void animate(fade_in_sequence);
+  }, [prefersReducedMotion]);
 
   const jobHistory = [
 
@@ -64,7 +70,7 @@ export default function Experience() {
             "Embedded Linux",
             "Python",
             "Flask",
-            "Javascript",
+            "JavaScript",
             "HTML",
             "CSS"
           ],
@@ -72,15 +78,15 @@ export default function Experience() {
         {
           title: "DARPA COHO",
           description:
-          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in Typescript leveraging React and Tailwind.",
+          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in TypeScript leveraging React and Tailwind.",
           technology: [
             "Python",
-            "Typescript",
+            "TypeScript",
             "Docker",
             "ZMQ",
             "Redis",
             "React",
-            "TailwindCSS",
+            "Tailwind CSS",
           ],
         },
       ],
@@ -109,7 +115,7 @@ export default function Experience() {
         {
           title: "DARPA Ground Truth",
           description:
-            "Implemented scenarios to other researcher’s specifications in Java using Eclipse, Maven, and JUnit while also writing custom scripts in Python to generate reports to summarize simulation behavior after a completed run.",
+            "Implemented scenarios to other researchers' specifications in Java using Eclipse, Maven, and JUnit while also writing custom scripts in Python to generate reports to summarize simulation behavior after a completed run.",
           technology: ["Java", "Python", "OOP", "Maven", "Eclipse", "JUnit"],
         },
       ],
@@ -117,10 +123,15 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
-      <h1 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
+    <section
+      id="experience"
+      tabIndex={-1}
+      aria-label="Experience"
+      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
+    >
+      <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:sr-only">
         experience
-      </h1>
+      </h2>
       <div className="flex w-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
@@ -136,7 +147,7 @@ export default function Experience() {
           );
         })}
       </div>
-    </main>
+    </section>
   );
 }
 
@@ -175,7 +186,7 @@ const JobCard = ({
       </p>
       <div className="flex w-3/4 flex-col gap-3">
         <div className="flex flex-col md:flex-row md:items-center md:gap-2">
-          <p className="text-base font-semibold ">{title} </p>
+          <h3 className="text-base font-semibold ">{title} </h3>
           <span className="hidden md:flex">{"·"}</span>
           <p className="text-base">{company}</p>
         </div>
@@ -185,7 +196,7 @@ const JobCard = ({
             return (
               <li key={project.title} className="flex w-full">
                 <div className="flex w-full flex-col gap-2  rounded p-2 text-sm">
-                  <p className="flex text-xs font-semibold">{project.title}</p>
+                  <h4 className="flex text-xs font-semibold">{project.title}</h4>
                   <p className="flex text-zinc-300">{project.description}</p>
                   <ul className="flex w-full flex-wrap gap-2 text-end text-xs text-zinc-300">
                     {project.technology.map((tech, index) => {

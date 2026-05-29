@@ -1,20 +1,25 @@
-import NavList from "./homepage/nav-list";
-import Experience from "./experience-section";
+"use client";
+import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
+import NavList from "./homepage/nav-list";
+import Experience from "./experience-section";
+import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+
 export default function MainScreen() {
-  if (typeof document !== "undefined") {
-    // will run in client's browser only
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
     const fade_in_sequence: AnimationSequence = [
       [".left-col", { opacity: [0, 1] }, { duration: 0.5, at: 0 }],
       [".right-col", { opacity: [0, 1] }, { duration: 0.5, at: 0 }],
-      [".nav-btns", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    animate(fade_in_sequence);
-  }
+    void animate(fade_in_sequence);
+  }, [prefersReducedMotion]);
 
   return (
-    <main className="flex h-full max-w-screen-xl flex-col  items-center justify-between lg:flex-row lg:items-start">
+    <div className="flex h-full max-w-screen-xl flex-col  items-center justify-between lg:flex-row lg:items-start">
       <header className="left-col flex w-full flex-col items-center gap-4 py-12 lg:sticky lg:max-h-screen lg:w-1/2 lg:py-24">
         <NavList />
       </header>
@@ -22,6 +27,6 @@ export default function MainScreen() {
       <div className="right-col flex h-full w-full justify-center lg:h-screen lg:w-1/2 lg:justify-normal">
         <Experience />
       </div>
-    </main>
+    </div>
   );
 }
