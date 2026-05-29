@@ -1,12 +1,12 @@
-import { type TimelineDefinition, timeline } from "motion";
+import { animate, type AnimationSequence } from "motion";
 
 export default function Experience() {
   if (typeof document !== "undefined") {
     // will run in client's browser only
-    const fade_in_sequence: TimelineDefinition = [
+    const fade_in_sequence: AnimationSequence = [
       [".experience", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    timeline(fade_in_sequence);
+    animate(fade_in_sequence);
   }
 
   const jobHistory = [
@@ -18,8 +18,27 @@ export default function Experience() {
       url: "https://www.medtronic.com/us-en/healthcare-professionals/therapies-procedures/cardiovascular/renal-denervation.html",
       date: "2024 - Present",
       details:
-        "Developed cross-platform and embedded software for the Coronary and Renal Denervation R&D group.",
-      projects: [],
+        "Develop and maintain embedded software and Linux platform infrastructure for the Coronary and Renal Denervation R&D group, spanning device drivers, OS reliability and recovery, and the secure build-and-delivery pipeline. Diagnosed and resolved complex runtime defects across the therapy application and diagnostic tooling, including memory-allocation issues and CLI behavior affecting system diagnostics.",
+      projects: [
+        {
+          title: "Alpha-1 Embedded Platform",
+          description:
+            "Led bring-up and system-level debugging of the SPI interface for the temperature subsystem, partnering with hardware and FPGA teams and using lab instrumentation to resolve signal and driver issues for reliable sensor communication on production boards. Implemented embedded drivers and HAL integrations for temperature monitoring, catheter-state integration, and EMI test-mode validation across RPU/APU components, plus EEPROM communication, diagnostic self-tests, and fan-RPM hardware monitoring for configuration validation and startup verification.",
+          technology: ["C++", "Embedded", "SPI", "HAL", "EEPROM", "FPGA", "CodeBeamer"],
+        },
+        {
+          title: "Aurora OS Platform",
+          description:
+            "Contributed core platform capabilities to the Aurora OS, including system health monitoring, boot validation, and reliability safeguards for device startup and recovery. Implemented key components of the dual-boot architecture — boot-image validation, system health checks, and mechanisms that prevent booting into unhealthy images.",
+          technology: ["C++", "Embedded Linux", "Yocto BitBake", "PetaLinux", "Bash"],
+        },
+        {
+          title: "Aurora OS Build & Delivery",
+          description:
+            "Integrated cryptographic code-signing into the Aurora OS build pipeline in partnership with DevOps, enabling secure, signed build artifacts and system images. Built infrastructure for packaging and mounting containerized applications within the OS image to support modular deployment and upgrade workflows.",
+          technology: ["Python", "Bash", "GitLab CI/CD", "JFrog Artifactory", "Containers"],
+        },
+      ],
     },
     {
       id: "1",
