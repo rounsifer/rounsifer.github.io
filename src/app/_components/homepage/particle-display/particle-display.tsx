@@ -23,7 +23,7 @@ const CYCLE_MS = 4200;
 // --- Background tuning knobs (safe to change by number) ---
 const COUNT = 65000; // particle count — higher = denser, bigger-feeling shapes
 const CAMERA_ZOOM = 4.0; // higher = the shape fills more of the screen
-const BG_OPACITY = 0.9; // overall background presence (readability vs presence)
+const BG_OPACITY = 0.7; // overall background presence (readability vs presence)
 const AUTO_ROTATE = 0.12; // radians/sec the field slowly spins
 
 type Build = (count: number) => Float32Array;
@@ -197,24 +197,26 @@ const heartbeat: Build = (count) => {
 
 const dna: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const height = 0.82;
-  const radius = 0.14;
-  const turns = 3;
+  const height = 0.86;
+  const R = 0.2; // wider helix so the two strands clearly separate
+  const turns = 2.0; // more open spiral
+  const rungCount = 14;
   for (let i = 0; i < count; i++) {
-    const r = Math.random();
-    const y = (r - 0.5) * height;
-    const angle = r * turns * Math.PI * 2;
-    if (Math.random() < 0.82) {
-      const a = angle + (Math.random() < 0.5 ? 0 : Math.PI);
-      const j = (Math.random() - 0.5) * 0.01;
-      p.set([Math.cos(a) * radius + j, y, Math.sin(a) * radius + j], i * 3);
+    if (Math.random() < 0.8) {
+      // Two backbone strands, 180 deg apart, winding down the y axis.
+      const t = Math.random();
+      const y = (t - 0.5) * height;
+      const angle = t * turns * Math.PI * 2 + (Math.random() < 0.5 ? 0 : Math.PI);
+      const j = (Math.random() - 0.5) * 0.006;
+      p.set([Math.cos(angle) * R + j, y, Math.sin(angle) * R + j], i * 3);
     } else {
-      const t2 = Math.random();
-      const x1 = Math.cos(angle) * radius;
-      const z1 = Math.sin(angle) * radius;
-      const x2 = Math.cos(angle + Math.PI) * radius;
-      const z2 = Math.sin(angle + Math.PI) * radius;
-      p.set([x1 + (x2 - x1) * t2, y, z1 + (z2 - z1) * t2], i * 3);
+      // Discrete ladder rungs connecting the two strands.
+      const step = Math.floor(Math.random() * rungCount);
+      const t = step / (rungCount - 1);
+      const y = (t - 0.5) * height;
+      const angle = t * turns * Math.PI * 2;
+      const m = 1 - 2 * Math.random(); // -1..1: strand A -> center -> strand B
+      p.set([Math.cos(angle) * R * m, y, Math.sin(angle) * R * m], i * 3);
     }
   }
   return p;
