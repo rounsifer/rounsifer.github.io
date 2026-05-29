@@ -48,23 +48,68 @@ const sphere: Build = (count) => {
   return p;
 };
 
+// Milky Way: a barred spiral — central flattened bulge, a bar, and two
+// logarithmic arms emanating from the bar ends in a thin disk.
 const galaxy: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const arms = 3;
+  const maxR = 0.42;
+  const arms = 2;
+  const pitch = 0.22; // ~12.6deg arm pitch
+  const barLen = 0.16; // half-length of the central bar
   for (let i = 0; i < count; i++) {
-    const t = Math.random();
-    const dist = t * 0.42;
-    const arm = Math.floor(Math.random() * arms);
-    const angle = arm * ((Math.PI * 2) / arms) + dist * 7.0;
-    const jitter = (Math.random() - 0.5) * 0.05;
-    p.set(
-      [
-        Math.cos(angle) * dist + jitter,
-        (Math.random() - 0.5) * 0.05 * (1 - t * 0.7),
-        Math.sin(angle) * dist + jitter,
-      ],
-      i * 3,
-    );
+    const roll = Math.random();
+    if (roll < 0.24) {
+      // central bulge: dense, slightly flattened ellipsoid (warm core)
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const rr = 0.12 * Math.cbrt(Math.random());
+      p.set(
+        [
+          rr * Math.sin(phi) * Math.cos(theta),
+          rr * Math.cos(phi) * 0.45,
+          rr * Math.sin(phi) * Math.sin(theta),
+        ],
+        i * 3,
+      );
+    } else if (roll < 0.36) {
+      // central bar through the bulge (along x)
+      const bx = (Math.random() * 2 - 1) * barLen;
+      const taper = 1 - (Math.abs(bx) / barLen) * 0.5;
+      p.set(
+        [
+          bx,
+          (Math.random() - 0.5) * 0.035 * taper,
+          (Math.random() - 0.5) * 0.06 * taper,
+        ],
+        i * 3,
+      );
+    } else if (roll < 0.92) {
+      // two logarithmic spiral arms from the bar ends
+      const arm = Math.floor(Math.random() * arms);
+      const t = Math.random();
+      const r = barLen + (maxR - barLen) * t * t; // denser inner
+      const theta =
+        arm * ((Math.PI * 2) / arms) + Math.log(r / barLen) / Math.tan(pitch);
+      const ax = Math.cos(theta);
+      const az = Math.sin(theta);
+      const spread = (Math.random() - 0.5 + Math.random() - 0.5) * 0.05; // arm width
+      p.set(
+        [
+          ax * r - az * spread,
+          (Math.random() - 0.5) * 0.025 * (1 - t * 0.6), // thin disk
+          az * r + ax * spread,
+        ],
+        i * 3,
+      );
+    } else {
+      // faint inter-arm disk scatter
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.sqrt(Math.random()) * maxR;
+      p.set(
+        [Math.cos(a) * r, (Math.random() - 0.5) * 0.03, Math.sin(a) * r],
+        i * 3,
+      );
+    }
   }
   return p;
 };
