@@ -73,6 +73,10 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
+      - name: Lint
+        # Next 16 no longer runs ESLint during build, so gate on it explicitly.
+        run: npm run lint
+
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 

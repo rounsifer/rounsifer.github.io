@@ -11,6 +11,8 @@ export const CustomCursor = ({ children }: { children: React.ReactNode }) => {
     let frame = 0;
 
     const onMove = (e: MouseEvent) => {
+      // Reveal on first movement; setState is a no-op once already visible.
+      setIsVisible(true);
       // Move the cursor via a ref + rAF so pointer movement never triggers a
       // React re-render of the wrapped app subtree.
       cancelAnimationFrame(frame);
@@ -22,18 +24,16 @@ export const CustomCursor = ({ children }: { children: React.ReactNode }) => {
         }
       });
     };
-    const show = () => setIsVisible(true);
     const hide = () => setIsVisible(false);
 
     window.addEventListener("mousemove", onMove);
-    document.body.addEventListener("mouseover", show);
-    document.body.addEventListener("mouseout", hide);
+    // mouseleave does not bubble, so this fires only when leaving the document.
+    document.documentElement.addEventListener("mouseleave", hide);
 
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("mousemove", onMove);
-      document.body.removeEventListener("mouseover", show);
-      document.body.removeEventListener("mouseout", hide);
+      document.documentElement.removeEventListener("mouseleave", hide);
     };
   }, []);
 

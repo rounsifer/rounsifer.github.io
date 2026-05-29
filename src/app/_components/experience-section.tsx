@@ -124,10 +124,12 @@ export default function Experience() {
 
   return (
     <section
+      id="experience"
+      tabIndex={-1}
       aria-label="Experience"
       className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
     >
-      <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
+      <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:sr-only">
         experience
       </h2>
       <div className="flex w-full flex-col gap-6">
@@ -184,7 +186,7 @@ const JobCard = ({
       </p>
       <div className="flex w-3/4 flex-col gap-3">
         <div className="flex flex-col md:flex-row md:items-center md:gap-2">
-          <p className="text-base font-semibold ">{title} </p>
+          <h3 className="text-base font-semibold ">{title} </h3>
           <span className="hidden md:flex">{"·"}</span>
           <p className="text-base">{company}</p>
         </div>
@@ -194,7 +196,7 @@ const JobCard = ({
             return (
               <li key={project.title} className="flex w-full">
                 <div className="flex w-full flex-col gap-2  rounded p-2 text-sm">
-                  <p className="flex text-xs font-semibold">{project.title}</p>
+                  <h4 className="flex text-xs font-semibold">{project.title}</h4>
                   <p className="flex text-zinc-300">{project.description}</p>
                   <ul className="flex w-full flex-wrap gap-2 text-end text-xs text-zinc-300">
                     {project.technology.map((tech, index) => {
