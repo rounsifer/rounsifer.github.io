@@ -38,12 +38,12 @@ export default function NavList() {
       </div>
 
       <div className="flex  w-fit flex-col gap-2 rounded-2xl  text-white">
-        <a
+        <Link
           href="/"
           className="my-name text-4xl font-bold tracking-tight text-zinc-300 sm:text-5xl"
         >
           Ron Rounsifer
-        </a>
+        </Link>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
         <p className="mt-2 max-w-xs  leading-normal text-zinc-400 lg:mt-4">
           I design and build highly performant, mission-critical systems for all
