@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
 import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+import { useParticleTheme, themeForCompany } from "./particle-theme";
 
 export default function Experience() {
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -180,11 +181,21 @@ const JobCard = ({
   detail,
   projects,
 }: JobCardProps) => {
+  const { setTheme } = useParticleTheme();
+  const theme = themeForCompany(company);
+  // Drive the particle display's themed shapes while this card is hovered or
+  // keyboard-focused; revert to the default shapes on leave/blur.
+  const applyTheme = (on: boolean) => setTheme(on ? theme : null);
+
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      onMouseEnter={() => applyTheme(true)}
+      onMouseLeave={() => applyTheme(false)}
+      onFocus={() => applyTheme(true)}
+      onBlur={() => applyTheme(false)}
       className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300"
     >
       <p className="h-fit w-1/4 pt-1 text-xs font-semibold tracking-wide lg:text-center ">
