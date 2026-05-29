@@ -30,24 +30,6 @@ type Build = (count: number) => Float32Array;
 
 // ---------------------------- Default shapes ----------------------------
 
-const sphere: Build = (count) => {
-  const p = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(2 * Math.random() - 1);
-    const r = RADIUS * Math.cbrt(Math.random());
-    p.set(
-      [
-        r * Math.sin(phi) * Math.cos(theta),
-        r * Math.sin(phi) * Math.sin(theta),
-        r * Math.cos(phi),
-      ],
-      i * 3,
-    );
-  }
-  return p;
-};
-
 // Milky Way: a barred spiral — central flattened bulge, a bar, and two
 // logarithmic arms emanating from the bar ends in a thin disk.
 const galaxy: Build = (count) => {
@@ -110,85 +92,6 @@ const galaxy: Build = (count) => {
         i * 3,
       );
     }
-  }
-  return p;
-};
-
-const torus: Build = (count) => {
-  const p = new Float32Array(count * 3);
-  const R = 0.3;
-  const r = 0.12;
-  for (let i = 0; i < count; i++) {
-    const u = Math.random() * Math.PI * 2;
-    const v = Math.random() * Math.PI * 2;
-    p.set(
-      [
-        (R + r * Math.cos(v)) * Math.cos(u),
-        r * Math.sin(v),
-        (R + r * Math.cos(v)) * Math.sin(u),
-      ],
-      i * 3,
-    );
-  }
-  return p;
-};
-
-const cube: Build = (count) => {
-  const p = new Float32Array(count * 3);
-  const h = 0.3;
-  for (let i = 0; i < count; i++) {
-    const a = (Math.random() * 2 - 1) * h;
-    const b = (Math.random() * 2 - 1) * h;
-    const face = Math.floor(Math.random() * 6);
-    const xyz =
-      face === 0
-        ? [h, a, b]
-        : face === 1
-          ? [-h, a, b]
-          : face === 2
-            ? [a, h, b]
-            : face === 3
-              ? [a, -h, b]
-              : face === 4
-                ? [a, b, h]
-                : [a, b, -h];
-    p.set(xyz, i * 3);
-  }
-  return p;
-};
-
-const grid: Build = (count) => {
-  const p = new Float32Array(count * 3);
-  const n = 9;
-  const nodes = n * n * n;
-  const span = 0.74;
-  const jitter = 0.008;
-  for (let i = 0; i < count; i++) {
-    const node = i % nodes;
-    const ix = node % n;
-    const iy = Math.floor(node / n) % n;
-    const iz = Math.floor(node / (n * n)) % n;
-    p.set(
-      [
-        (ix / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
-        (iy / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
-        (iz / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
-      ],
-      i * 3,
-    );
-  }
-  return p;
-};
-
-const wave: Build = (count) => {
-  const p = new Float32Array(count * 3);
-  const span = 0.82;
-  for (let i = 0; i < count; i++) {
-    const x = (Math.random() - 0.5) * span;
-    const z = (Math.random() - 0.5) * span;
-    const d = Math.sqrt(x * x + z * z);
-    const y = Math.sin(d * 16.0) * 0.07 + Math.sin(x * 10.0) * 0.02;
-    p.set([x, y, z], i * 3);
   }
   return p;
 };
@@ -376,27 +279,200 @@ const globe: Build = (count) => {
   return p;
 };
 
-type ShapeDef = { name: string; build: Build };
+// ------------------- Default shapes: things Ron has built -------------------
+
+// A shape is a buffer of positions plus an optional per-frame `animate` that
+// mutates the buffer while the shape is on screen (so it can move/flow).
+type ShapeInstance = {
+  positions: Float32Array;
+  animate?: (buf: Float32Array, t: number) => void;
+};
+type Factory = (count: number) => ShapeInstance;
+
+// Wrap a static point-cloud builder as a (non-animated) factory.
+const stat =
+  (build: Build): Factory =>
+  (count) => ({ positions: build(count) });
+
+// Network graph: node clusters joined by edges, with particles flowing along
+// the edges (comms moving through the graph).
+const graphFactory: Factory = (count) => {
+  const NODES = 18;
+  const nodes: [number, number, number][] = [];
+  for (let k = 0; k < NODES; k++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const r = RADIUS * 0.85 * Math.cbrt(Math.random());
+    nodes.push([
+      r * Math.sin(ph) * Math.cos(th),
+      r * Math.sin(ph) * Math.sin(th),
+      r * Math.cos(ph),
+    ]);
+  }
+  const edges: [number, number][] = [];
+  for (let k = 0; k < NODES; k++) {
+    for (let m = 0; m < 2; m++) {
+      edges.push([k, (k + 1 + Math.floor(Math.random() * (NODES - 1))) % NODES]);
+    }
+  }
+  const isEdge = new Uint8Array(count);
+  const ref = new Int32Array(count);
+  const phase = new Float32Array(count);
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.32) {
+      const n = nodes[Math.floor(Math.random() * NODES)]!;
+      positions[i * 3] = n[0] + (Math.random() - 0.5) * 0.03;
+      positions[i * 3 + 1] = n[1] + (Math.random() - 0.5) * 0.03;
+      positions[i * 3 + 2] = n[2] + (Math.random() - 0.5) * 0.03;
+    } else {
+      isEdge[i] = 1;
+      ref[i] = Math.floor(Math.random() * edges.length);
+      phase[i] = Math.random();
+    }
+  }
+  const animate = (buf: Float32Array, t: number) => {
+    for (let i = 0; i < count; i++) {
+      if (isEdge[i]) {
+        const e = edges[ref[i]!]!;
+        const a = nodes[e[0]]!;
+        const b = nodes[e[1]]!;
+        const f = (phase[i]! + t * 0.18) % 1; // packet position along the edge
+        buf[i * 3] = a[0] + (b[0] - a[0]) * f;
+        buf[i * 3 + 1] = a[1] + (b[1] - a[1]) * f;
+        buf[i * 3 + 2] = a[2] + (b[2] - a[2]) * f;
+      }
+    }
+  };
+  animate(positions, 0);
+  return { positions, animate };
+};
+
+// Drone swarm: a cohesive body of agents that coherently drift and jostle.
+const swarmFactory: Factory = (count) => {
+  const base = new Float32Array(count * 3);
+  const seed = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const r = 0.34 * Math.cbrt(Math.random());
+    base[i * 3] = r * Math.sin(ph) * Math.cos(th) * 1.25; // elongated forward
+    base[i * 3 + 1] = r * Math.cos(ph) * 0.8;
+    base[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+    seed[i * 3] = Math.random() * Math.PI * 2;
+    seed[i * 3 + 1] = Math.random() * Math.PI * 2;
+    seed[i * 3 + 2] = Math.random() * Math.PI * 2;
+  }
+  const positions = new Float32Array(count * 3);
+  const animate = (buf: Float32Array, t: number) => {
+    const gx = Math.sin(t * 0.6) * 0.05; // coherent group drift
+    const gy = Math.sin(t * 0.5 + 1.3) * 0.04;
+    const gz = Math.cos(t * 0.45) * 0.05;
+    const amp = 0.025; // per-agent jitter
+    for (let i = 0; i < count; i++) {
+      buf[i * 3] = base[i * 3]! + gx + Math.sin(t * 1.4 + seed[i * 3]!) * amp;
+      buf[i * 3 + 1] =
+        base[i * 3 + 1]! + gy + Math.sin(t * 1.7 + seed[i * 3 + 1]!) * amp;
+      buf[i * 3 + 2] =
+        base[i * 3 + 2]! + gz + Math.sin(t * 1.2 + seed[i * 3 + 2]!) * amp;
+    }
+  };
+  animate(positions, 0);
+  return { positions, animate };
+};
+
+// WiFi / wardriving: nested radiating arcs (a signal fan) from a source point.
+const wifi: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const rings = 4;
+  const span = (130 * Math.PI) / 180;
+  const baseY = -0.28;
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.12) {
+      p.set(
+        [
+          (Math.random() - 0.5) * 0.04,
+          baseY + (Math.random() - 0.5) * 0.04,
+          (Math.random() - 0.5) * 0.04,
+        ],
+        i * 3,
+      );
+    } else {
+      const ring = 1 + Math.floor(Math.random() * rings);
+      const rad = (ring / rings) * 0.46;
+      const a = Math.PI / 2 + (Math.random() - 0.5) * span;
+      const jit = (Math.random() - 0.5) * 0.01;
+      p.set(
+        [
+          Math.cos(a) * (rad + jit),
+          baseY + Math.sin(a) * (rad + jit),
+          (Math.random() - 0.5) * 0.02,
+        ],
+        i * 3,
+      );
+    }
+  }
+  return p;
+};
+
+// Particle filter: a belief cloud (dense estimate + diffuse uncertainty +
+// competing hypotheses) that periodically converges/resamples toward the estimate.
+const particleFilterFactory: Factory = (count) => {
+  const base = new Float32Array(count * 3);
+  const centers: [number, number, number][] = [
+    [0, 0, 0],
+    [0.22, 0.12, -0.1],
+    [-0.18, -0.1, 0.14],
+  ];
+  const weights = [0.7, 0.18, 0.12];
+  const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 0.66;
+  for (let i = 0; i < count; i++) {
+    const r = Math.random();
+    let c = 0;
+    let acc = 0;
+    for (let k = 0; k < centers.length; k++) {
+      acc += weights[k]!;
+      if (r < acc) {
+        c = k;
+        break;
+      }
+    }
+    const center = centers[c]!;
+    const sd = c === 0 ? 0.14 : 0.09;
+    base[i * 3] = center[0] + gauss() * sd;
+    base[i * 3 + 1] = center[1] + gauss() * sd;
+    base[i * 3 + 2] = center[2] + gauss() * sd;
+  }
+  const positions = new Float32Array(count * 3);
+  const animate = (buf: Float32Array, t: number) => {
+    const converge = Math.max(0, Math.sin(t * 0.5)) * 0.5; // resampling pulse
+    const k = 1 - converge;
+    for (let i = 0; i < count * 3; i++) buf[i] = base[i]! * k;
+  };
+  animate(positions, 0);
+  return { positions, animate };
+};
+
+type ShapeDef = { name: string; factory: Factory };
 const THEMES: Record<"default" | "medtronic" | "raytheon", ShapeDef[]> = {
   default: [
-    { name: "Orb", build: sphere },
-    { name: "Galaxy", build: galaxy },
-    { name: "Torus", build: torus },
-    { name: "Cube", build: cube },
-    { name: "Grid", build: grid },
-    { name: "Wave", build: wave },
+    { name: "Milky Way", factory: stat(galaxy) },
+    { name: "Graph", factory: graphFactory },
+    { name: "Swarm", factory: swarmFactory },
+    { name: "WiFi", factory: stat(wifi) },
+    { name: "Filter", factory: particleFilterFactory },
   ],
   medtronic: [
-    { name: "Heart", build: heart },
-    { name: "Pulse", build: heartbeat },
-    { name: "Pill", build: pill },
-    { name: "Cross", build: cross },
+    { name: "Heart", factory: stat(heart) },
+    { name: "Pulse", factory: stat(heartbeat) },
+    { name: "Pill", factory: stat(pill) },
+    { name: "Cross", factory: stat(cross) },
   ],
   raytheon: [
-    { name: "Radar", build: radar },
-    { name: "Orbit", build: orbit },
-    { name: "Signal", build: signal },
-    { name: "Globe", build: globe },
+    { name: "Radar", factory: stat(radar) },
+    { name: "Orbit", factory: stat(orbit) },
+    { name: "Signal", factory: stat(signal) },
+    { name: "Globe", factory: stat(globe) },
   ],
 };
 type ThemeKey = keyof typeof THEMES;
@@ -416,12 +492,12 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
   const points = useRef<Points<BufferGeometry, ShaderMaterial>>(null!);
 
   // Build every shape of every theme once (lazy initializer keeps RNG out of render).
-  const [sets] = useState<Record<ThemeKey, Float32Array[]>>(() => ({
-    default: THEMES.default.map((s) => s.build(count)),
-    medtronic: THEMES.medtronic.map((s) => s.build(count)),
-    raytheon: THEMES.raytheon.map((s) => s.build(count)),
+  const [sets] = useState<Record<ThemeKey, ShapeInstance[]>>(() => ({
+    default: THEMES.default.map((s) => s.factory(count)),
+    medtronic: THEMES.medtronic.map((s) => s.factory(count)),
+    raytheon: THEMES.raytheon.map((s) => s.factory(count)),
   }));
-  const [renderBuffer] = useState(() => sets.default[0]!.slice());
+  const [renderBuffer] = useState(() => sets.default[0]!.positions.slice());
 
   const uniforms = useMemo(
     () => ({ uTime: { value: 0 }, uRadius: { value: 0.5 } }),
@@ -433,6 +509,7 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     idx: 0,
     from: new Float32Array(count * 3),
     t: 1,
+    restStart: 0,
   });
 
   useFrame((state, delta) => {
@@ -441,9 +518,11 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     const arr = attr.array as Float32Array;
     const set = sets[theme];
     const idx = active % set.length;
-    const target = set[idx];
-    if (!target) return;
+    const shape = set[idx];
+    if (!shape) return;
+    const target = shape.positions;
     const m = morph.current;
+    const elapsed = state.clock.elapsedTime;
 
     if (reducedMotion) {
       if (m.theme !== theme || m.idx !== idx) {
@@ -457,7 +536,7 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
 
     const dt = Math.min(delta, 0.05);
     const uTime = points.current?.material.uniforms.uTime;
-    if (uTime) uTime.value = state.clock.elapsedTime;
+    if (uTime) uTime.value = elapsed;
     // Slow auto-spin (replaces OrbitControls autoRotate for the non-interactive bg).
     if (points.current) points.current.rotation.y += dt * AUTO_ROTATE;
 
@@ -473,6 +552,12 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
       const f = easeInOutCubic(m.t);
       for (let i = 0; i < arr.length; i++)
         arr[i] = m.from[i]! + (target[i]! - m.from[i]!) * f;
+      attr.needsUpdate = true;
+      if (m.t >= 1) m.restStart = elapsed; // mark when the shape settles
+    } else if (shape.animate) {
+      // Animated shapes keep moving while displayed (local time keeps the
+      // hand-off from the morph seamless, since animate(buf, 0) === positions).
+      shape.animate(arr, elapsed - m.restStart);
       attr.needsUpdate = true;
     }
   });
