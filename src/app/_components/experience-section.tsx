@@ -1,13 +1,19 @@
+"use client";
+import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
+import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+
 export default function Experience() {
-  if (typeof document !== "undefined") {
-    // will run in client's browser only
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
     const fade_in_sequence: AnimationSequence = [
       [".experience", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    animate(fade_in_sequence);
-  }
+    void animate(fade_in_sequence);
+  }, [prefersReducedMotion]);
 
   const jobHistory = [
 
@@ -117,10 +123,13 @@ export default function Experience() {
   ];
 
   return (
-    <main className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24">
-      <h1 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
+    <section
+      aria-label="Experience"
+      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 mix-blend-exclusion lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
+    >
+      <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-500 lg:hidden">
         experience
-      </h1>
+      </h2>
       <div className="flex w-full flex-col gap-6">
         {jobHistory.map((job) => {
           return (
@@ -136,7 +145,7 @@ export default function Experience() {
           );
         })}
       </div>
-    </main>
+    </section>
   );
 }
 

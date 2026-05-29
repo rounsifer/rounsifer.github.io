@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+
+import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
 
 // The Three.js <Canvas> relies on react-reconciler, which can't be server-rendered
 // during Next's static export (it reads React internals that are undefined on the
@@ -15,71 +18,70 @@ const ParticleDisplay = dynamic(
 );
 
 export default function NavList() {
-  if (typeof document !== "undefined") {
-    // will run in client's browser only
+  const prefersReducedMotion = usePrefersReducedMotion();
 
+  useEffect(() => {
+    if (prefersReducedMotion) return;
     const fade_in_sequence: AnimationSequence = [
-      [".navlist", { display: "flex" }],
-    ];
-    animate(fade_in_sequence);
-
-    const fade_in_sequence_2: AnimationSequence = [
       [".my-name", { opacity: [0, 1] }, { duration: 1, at: 0 }],
       [".my-tagline", { opacity: [0, 1] }, { duration: 1, at: 0 }],
       [".social-links", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    animate(fade_in_sequence_2);
-  }
+    void animate(fade_in_sequence);
+  }, [prefersReducedMotion]);
 
   return (
-    <div className="navlist flex hidden h-full max-h-screen flex-col justify-between ">
+    <div className="navlist flex h-full max-h-screen flex-col justify-between ">
       <div className="mb-12 flex lg:mb-24 lg:hidden">
         <ParticleDisplay />
       </div>
 
       <div className="flex  w-fit flex-col gap-2 rounded-2xl  text-white">
-        <Link
-          href="/"
-          className="my-name text-4xl font-bold tracking-tight text-zinc-300 sm:text-5xl"
-        >
-          Ron Rounsifer
-        </Link>
+        <h1 className="my-name">
+          <Link
+            href="/"
+            className="text-4xl font-bold tracking-tight text-zinc-300 sm:text-5xl"
+          >
+            Ron Rounsifer
+          </Link>
+        </h1>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
-        <p className="mt-2 max-w-xs  leading-normal text-zinc-400 lg:mt-4">
+        <p className="my-tagline mt-2 max-w-xs  leading-normal text-zinc-400 lg:mt-4">
           I design and build highly performant, mission-critical systems for all
           domains.
         </p>
-
-        
-
       </div>
 
       <div className=" mt-10 pt-5 pb-5 rounded-t-lg p-10 hidden lg:flex bg-slate-800/10 border-zinc-800 border">
         <ParticleDisplay />
       </div>
-      
+
       <div className="flex flex-row justify-between px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/50 w-full">
+        <a
+          href={"https://ieeexplore.ieee.org/author/37087008577"}
+          target="_blank"
+          rel="noreferrer"
+          className="hover:text-white hover:scale-105"
+        >
+          publications
+        </a>
+        -
+        <Link href={""} className="hover:text-white hover:scale-105">
+          algorithms
+        </Link>
+        -
+        <Link href={""} className="hover:text-white hover:scale-105">
+          system design
+        </Link>
+      </div>
 
-<a href={"https://ieeexplore.ieee.org/author/37087008577"} target="_blank" rel="noreferrer" className="hover:text-white hover:scale-105">
-  publications
-</a>
--
-<Link href={""} className="hover:text-white hover:scale-105">
-  algorithms
-</Link>
--
-<Link href={""} className="hover:text-white hover:scale-105">
-  system design
-</Link>
-
-
-</div>
       <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">
         <li className="text-zinc-500">
           <a
             href="https://github.com/rounsifer"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="GitHub profile"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -87,6 +89,8 @@ export default function NavList() {
               height="24"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
               className="icon icon-tabler icons-tabler-filled icon-tabler-brand-github"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -99,6 +103,7 @@ export default function NavList() {
             href="https://www.linkedin.com/in/ronaldrounsifer/"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="LinkedIn profile"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -110,6 +115,8 @@ export default function NavList() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
               className="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -123,24 +130,22 @@ export default function NavList() {
         </li>
 
         <li className="text-zinc-500">
-          <button
-            onClick={() =>
-              (window.location.href = "mailto:ronrounsifer@gmail.com")
-            }
-          >
+          <a href="mailto:ronrounsifer@gmail.com" aria-label="Email Ron">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
               className="icon icon-tabler icons-tabler-filled icon-tabler-mail"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M22 7.535v9.465a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-9.465l9.445 6.297l.116 .066a1 1 0 0 0 .878 0l.116 -.066l9.445 -6.297z" />
               <path d="M19 4c1.08 0 2.027 .57 2.555 1.427l-9.555 6.37l-9.555 -6.37a2.999 2.999 0 0 1 2.354 -1.42l.201 -.007h14z" />
             </svg>
-          </button>
+          </a>
         </li>
       </ul>
     </div>

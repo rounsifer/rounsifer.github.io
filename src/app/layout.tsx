@@ -1,5 +1,6 @@
 import "~/styles/globals.css";
 
+import { type Metadata } from "next";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -7,10 +8,26 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata = {
+const description =
+  "Senior Software Engineer building high-performance, mission-critical embedded and platform systems.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://rounsifer.github.io"),
   title: "Ron Rounsifer",
-  description: "",
+  description,
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    title: "Ron Rounsifer",
+    description,
+    url: "https://rounsifer.github.io",
+    siteName: "Ron Rounsifer",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ron Rounsifer",
+    description,
+  },
 };
 
 export default function RootLayout({
@@ -21,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`font-sans ${inter.variable} no-scrollbar cursor-none overflow-x-hidden overflow-y-scroll lg:overflow-hidden`}
+        className={`font-sans ${inter.variable} no-scrollbar overflow-x-hidden overflow-y-scroll lg:overflow-hidden`}
       >
         {children}
       </body>

@@ -19,3 +19,29 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Hide the native cursor only on mouse-driven devices, where the custom
+   cursor takes over. Touch and keyboard contexts keep the native cursor. */
+@media (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}
+
+/* Visible keyboard focus indicator (Preflight removes the default outline). */
+:focus-visible {
+  outline: 2px solid #5786f5;
+  outline-offset: 2px;
+}
+
+/* Honor reduced-motion as a final safety net for any CSS animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
