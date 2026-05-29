@@ -51,7 +51,7 @@ export default function NavList() {
       {/* Single particle canvas kept in one stable DOM position (so its WebGL
           context never remounts): shown up top on mobile via order-first, and
           inside the framed box on desktop. */}
-      <div className="order-first mb-12 flex justify-center lg:order-none lg:mb-0 lg:mt-10 lg:rounded-t-lg lg:border lg:border-zinc-800 lg:bg-slate-800/10 lg:p-10">
+      <div className="order-first mb-12 flex justify-center lg:order-none lg:mb-0 lg:mt-10 lg:rounded-t-lg lg:border lg:border-zinc-800 lg:bg-slate-800/10 lg:p-4">
         <ParticleDisplay />
       </div>
 

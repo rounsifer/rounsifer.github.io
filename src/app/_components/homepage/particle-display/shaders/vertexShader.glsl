@@ -3,33 +3,16 @@ uniform float uRadius;
 
 varying float vDistance;
 
-// Source: https://github.com/dmnsgn/glsl-rotate/blob/main/rotation-3d-y.glsl.js
-mat3 rotation3dY(float angle) {
-  float s = sin(angle);
-  float c = cos(angle);
-  return mat3(
-    c, 0.0, -s,
-    0.0, 1.0, 0.0,
-    s, 0.0, c
-  );
-}
-
-// Source: https://github.com/dmnsgn/glsl-rotate/blob/main/rotation-3d-x.glsl.js
-mat3 rotation3dX(float angle) {
-  float s = sin(angle);
-  float c = cos(angle);
-  return mat3(
-    1.0, 0.0, 0.0,
-    0.0, c, s,
-    0.0, -s, c
-  );
-}
-
-
 void main() {
-  float distanceFactor = pow(uRadius - distance(position, vec3(0.0)), 1.5);
-  float size = distanceFactor * 10.0 + 10.0;
-  vec3 particlePosition = position * rotation3dX(uTime * 0.3 * distanceFactor);
+  float d = distance(position, vec3(0.0));
+  // Clamp so shapes larger than uRadius don't produce NaN sizes.
+  float distanceFactor = pow(max(uRadius - d, 0.0), 1.5);
+
+  // Gentle radial shimmer that keeps the shape recognizable (no full twist).
+  vec3 dir = normalize(position + vec3(1e-4));
+  vec3 particlePosition = position + dir * sin(uTime * 1.5 + d * 14.0) * 0.012;
+
+  float size = distanceFactor * 12.0 + 6.0;
 
   vDistance = distanceFactor;
 
