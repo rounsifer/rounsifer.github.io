@@ -44,7 +44,11 @@ const server = createServer(async (req, res) => {
 
 await new Promise((r) => server.listen(PORT, r));
 
-const browser = await chromium.launch();
+// --enable-unsafe-swiftshader lets WebGL run via software rendering on
+// GPU-less CI runners (GitHub Actions), so the Three.js canvas still mounts.
+const browser = await chromium.launch({
+  args: ["--enable-unsafe-swiftshader"],
+});
 const page = await browser.newPage();
 const consoleErrors = [];
 const pageErrors = [];

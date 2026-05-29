@@ -76,6 +76,14 @@ jobs:
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Runtime smoke test
+        # Loads the built ./out in headless Chromium and fails on any runtime
+        # error — catches client-side crashes that `next build` does not.
+        run: npm run smoke
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
