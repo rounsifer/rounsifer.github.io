@@ -17,7 +17,7 @@ import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
 import vertexShader from "./shaders/vertexShader.glsl";
 import fragmentShader from "./shaders/fragmentShader.glsl";
 
-export const ParticleDisplay = () => {
+export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const ParticleDisplay = () => {
         camera={{ position: [1.5, 1.5, 1.5], zoom: 4, near: 1, far: 1000 }}
       >
         <OrbitControls />
-        <CustomGeometryParticles count={10000} reducedMotion={prefersReducedMotion} />
+        <CustomGeometryParticles count={count} reducedMotion={prefersReducedMotion} />
       </Canvas>
     </div>
   );

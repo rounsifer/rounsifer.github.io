@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+import { useMediaQuery } from "~/hooks/use-media-query";
 
 // The Three.js <Canvas> relies on react-reconciler, which can't be server-rendered
 // during Next's static export (it reads React internals that are undefined on the
@@ -19,6 +20,7 @@ const ParticleDisplay = dynamic(
 
 export default function NavList() {
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -30,11 +32,14 @@ export default function NavList() {
     void animate(fade_in_sequence);
   }, [prefersReducedMotion]);
 
+  // Render a single particle canvas — mobile shows it up top, desktop inside the
+  // framed box — so only one WebGL context / animation loop ever exists. Fewer
+  // particles on small screens to ease mobile GPUs.
+  const particleDisplay = <ParticleDisplay count={isDesktop ? 10000 : 4000} />;
+
   return (
     <div className="navlist flex h-full max-h-screen flex-col justify-between ">
-      <div className="mb-12 flex lg:mb-24 lg:hidden">
-        <ParticleDisplay />
-      </div>
+      {!isDesktop && <div className="mb-12 flex">{particleDisplay}</div>}
 
       <div className="flex  w-fit flex-col gap-2 rounded-2xl  text-white">
         <h1 className="my-name">
@@ -52,11 +57,13 @@ export default function NavList() {
         </p>
       </div>
 
-      <div className=" mt-10 pt-5 pb-5 rounded-t-lg p-10 hidden lg:flex bg-slate-800/10 border-zinc-800 border">
-        <ParticleDisplay />
-      </div>
+      {isDesktop && (
+        <div className=" mt-10 pt-5 pb-5 rounded-t-lg p-10 flex bg-slate-800/10 border-zinc-800 border">
+          {particleDisplay}
+        </div>
+      )}
 
-      <div className="flex flex-row justify-between px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/50 w-full">
+      <div className="flex flex-row justify-center px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/50 w-full">
         <a
           href={"https://ieeexplore.ieee.org/author/37087008577"}
           target="_blank"
@@ -65,14 +72,6 @@ export default function NavList() {
         >
           publications
         </a>
-        -
-        <Link href={""} className="hover:text-white hover:scale-105">
-          algorithms
-        </Link>
-        -
-        <Link href={""} className="hover:text-white hover:scale-105">
-          system design
-        </Link>
       </div>
 
       <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">
