@@ -24,25 +24,31 @@ export default function Experience() {
       url: "https://www.medtronic.com/us-en/healthcare-professionals/therapies-procedures/cardiovascular/renal-denervation.html",
       date: "2024 - Present",
       details:
-        "Develop and maintain embedded software and Linux platform infrastructure for the Coronary and Renal Denervation R&D group, spanning device drivers, OS reliability and recovery, and the secure build-and-delivery pipeline. Diagnosed and resolved complex runtime defects across the therapy application and diagnostic tooling, including memory-allocation issues and CLI behavior affecting system diagnostics.",
+        "Embedded and Linux-platform software for a next-generation renal-denervation device — from sensor silicon bring-up to a secure, self-healing OS.",
       projects: [
         {
           title: "Alpha-1 Embedded Platform",
           description:
-            "Led bring-up and system-level debugging of the SPI interface for the temperature subsystem, partnering with hardware and FPGA teams and using lab instrumentation to resolve signal and driver issues for reliable sensor communication on production boards. Implemented embedded drivers and HAL integrations for temperature monitoring, catheter-state integration, and EMI test-mode validation across RPU/APU components, plus EEPROM communication, diagnostic self-tests, and fan-RPM hardware monitoring for configuration validation and startup verification.",
-          technology: ["C++", "Embedded", "SPI", "HAL", "EEPROM", "FPGA", "CodeBeamer"],
+            "Led SPI bring-up and system-level debug of the sensor subsystem with hardware and FPGA teams, and built the HAL drivers — temperature sensing, catheter-state integration, EMI test mode, and EEPROM self-tests.",
+          technology: ["C++", "Embedded", "SPI", "HAL", "FPGA"],
         },
         {
-          title: "Aurora OS Platform",
+          title: "Aurora OS Reliability",
           description:
-            "Contributed core platform capabilities to the Aurora OS, including system health monitoring, boot validation, and reliability safeguards for device startup and recovery. Implemented key components of the dual-boot architecture — boot-image validation, system health checks, and mechanisms that prevent booting into unhealthy images.",
-          technology: ["C++", "Embedded Linux", "Yocto BitBake", "PetaLinux", "Bash"],
+            "Built the Linux platform's reliability core: dual-boot with health-gated rollback that refuses to boot an unhealthy image, plus boot validation, health monitoring, and recovery.",
+          technology: ["C++", "Embedded Linux", "Yocto", "Bash"],
         },
         {
-          title: "Aurora OS Build & Delivery",
+          title: "Secure Build Pipeline",
           description:
-            "Integrated cryptographic code-signing into the Aurora OS build pipeline in partnership with DevOps, enabling secure, signed build artifacts and system images. Built infrastructure for packaging and mounting containerized applications within the OS image to support modular deployment and upgrade workflows.",
-          technology: ["Python", "Bash", "GitLab CI/CD", "JFrog Artifactory", "Containers"],
+            "Integrated cryptographic code-signing into the Aurora OS build pipeline with DevOps, producing signed, verifiable system images.",
+          technology: ["Python", "GitLab CI/CD", "JFrog Artifactory"],
+        },
+        {
+          title: "Containerized App Platform",
+          description:
+            "Built the infrastructure to package and mount containerized apps inside the OS image, enabling modular deployment and upgrades.",
+          technology: ["Containers", "Embedded Linux", "Bash"],
         },
       ],
     },
