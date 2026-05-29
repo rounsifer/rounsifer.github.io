@@ -1,16 +1,16 @@
 import NavList from "./homepage/nav-list";
 import Experience from "./experience-section";
-import { type TimelineDefinition, timeline } from "motion";
+import { animate, type AnimationSequence } from "motion";
 
 export default function MainScreen() {
   if (typeof document !== "undefined") {
     // will run in client's browser only
-    const fade_in_sequence: TimelineDefinition = [
+    const fade_in_sequence: AnimationSequence = [
       [".left-col", { opacity: [0, 1] }, { duration: 0.5, at: 0 }],
       [".right-col", { opacity: [0, 1] }, { duration: 0.5, at: 0 }],
       [".nav-btns", { opacity: [0, 1] }, { duration: 1, at: 0 }],
     ];
-    timeline(fade_in_sequence);
+    animate(fade_in_sequence);
   }
 
   return (

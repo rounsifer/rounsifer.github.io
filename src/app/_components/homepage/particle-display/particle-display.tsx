@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Quaternion, Vector3, MathUtils, AdditiveBlending } from "three";
 import { type Points, type Mesh } from "three";
 
-import { type TimelineDefinition, timeline } from "motion";
+import { animate, type AnimationSequence } from "motion";
 
 import vertexShader from "./shaders/vertexShader.glsl";
 import fragmentShader from "./shaders/fragmentShader.glsl";
@@ -14,10 +14,10 @@ export const ParticleDisplay = () => {
   if (typeof document !== "undefined") {
     // will run in client's browser only
 
-    const fade_in_sequence: TimelineDefinition = [
+    const fade_in_sequence: AnimationSequence = [
       [".particle-display", { opacity: [0, 1] }, { duration: 4, at: 0 }],
     ];
-    timeline(fade_in_sequence);
+    animate(fade_in_sequence);
   }
 
   return (
