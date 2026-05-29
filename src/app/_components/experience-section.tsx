@@ -70,7 +70,7 @@ export default function Experience() {
             "Embedded Linux",
             "Python",
             "Flask",
-            "Javascript",
+            "JavaScript",
             "HTML",
             "CSS"
           ],
@@ -78,15 +78,15 @@ export default function Experience() {
         {
           title: "DARPA COHO",
           description:
-          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in Typescript leveraging React and Tailwind.",
+          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in TypeScript leveraging React and Tailwind.",
           technology: [
             "Python",
-            "Typescript",
+            "TypeScript",
             "Docker",
             "ZMQ",
             "Redis",
             "React",
-            "TailwindCSS",
+            "Tailwind CSS",
           ],
         },
       ],
@@ -115,7 +115,7 @@ export default function Experience() {
         {
           title: "DARPA Ground Truth",
           description:
-            "Implemented scenarios to other researcher’s specifications in Java using Eclipse, Maven, and JUnit while also writing custom scripts in Python to generate reports to summarize simulation behavior after a completed run.",
+            "Implemented scenarios to other researchers' specifications in Java using Eclipse, Maven, and JUnit while also writing custom scripts in Python to generate reports to summarize simulation behavior after a completed run.",
           technology: ["Java", "Python", "OOP", "Maven", "Eclipse", "JUnit"],
         },
       ],
