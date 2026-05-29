@@ -12,26 +12,24 @@ import {
 import { animate, type AnimationSequence } from "motion";
 
 import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+import { useParticleTheme } from "../../particle-theme";
 
 import vertexShader from "./shaders/vertexShader.glsl";
 import fragmentShader from "./shaders/fragmentShader.glsl";
 
 const RADIUS = 0.45;
-const MORPH_SECONDS = 1.6; // transition time between shapes
-const CYCLE_MS = 4200; // auto-advance cadence
-
-// ---- Shape generators: each returns a Float32Array of `count` xyz points,
-// kept within ~RADIUS of the origin so the shader's size/colour math holds. ----
+const MORPH_SECONDS = 1.6;
+const CYCLE_MS = 4200;
 
 type Build = (count: number) => Float32Array;
+
+// ---------------------------- Default shapes ----------------------------
 
 const sphere: Build = (count) => {
   const p = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    // Volume fill (cube-root keeps density even) so distance-from-center
-    // varies — gives the orb a warmer, larger-pointed core.
     const r = RADIUS * Math.cbrt(Math.random());
     p.set(
       [
@@ -109,16 +107,14 @@ const cube: Build = (count) => {
   return p;
 };
 
-// 3D lattice — particles cluster tightly at each grid node so it reads as a
-// crisp data cube / matrix of points rather than a fuzzy cloud.
 const grid: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const n = 9; // 9 x 9 x 9 = 729 nodes
+  const n = 9;
   const nodes = n * n * n;
   const span = 0.74;
   const jitter = 0.008;
   for (let i = 0; i < count; i++) {
-    const node = i % nodes; // spread particles evenly across nodes
+    const node = i % nodes;
     const ix = node % n;
     const iy = Math.floor(node / n) % n;
     const iz = Math.floor(node / (n * n)) % n;
@@ -134,7 +130,6 @@ const grid: Build = (count) => {
   return p;
 };
 
-// Rippling surface — reads like a signal / waveform.
 const wave: Build = (count) => {
   const p = new Float32Array(count * 3);
   const span = 0.82;
@@ -148,14 +143,217 @@ const wave: Build = (count) => {
   return p;
 };
 
-const SHAPES: { name: string; build: Build }[] = [
-  { name: "Orb", build: sphere },
-  { name: "Galaxy", build: galaxy },
-  { name: "Torus", build: torus },
-  { name: "Cube", build: cube },
-  { name: "Grid", build: grid },
-  { name: "Wave", build: wave },
-];
+// ------------------------- Medtronic (cardiac) -------------------------
+
+const heart: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const sc = 0.026;
+  for (let i = 0; i < count; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const s = Math.cbrt(Math.random()); // fill toward edge
+    let x = 16 * Math.pow(Math.sin(t), 3) * sc;
+    let y =
+      (13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t)) *
+        sc +
+      0.11; // shift up so the heart is centered
+    x *= s;
+    y *= s;
+    const z = (Math.random() - 0.5) * 0.12 * (1 - s * 0.4);
+    p.set([x, y, z], i * 3);
+  }
+  return p;
+};
+
+const heartbeat: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const width = 0.92;
+  const beats = 2.2;
+  const g = (u: number, c: number, w: number, h: number) =>
+    h * Math.exp(-((u - c) * (u - c)) / (2 * w * w));
+  for (let i = 0; i < count; i++) {
+    const x = (Math.random() - 0.5) * width;
+    const u = (((x + width / 2) / width) * beats) % 1;
+    const y =
+      (g(u, 0.18, 0.03, 0.06) -
+        g(u, 0.34, 0.015, 0.06) +
+        g(u, 0.38, 0.012, 0.34) -
+        g(u, 0.42, 0.015, 0.12) +
+        g(u, 0.62, 0.05, 0.1)) *
+      0.55;
+    const band = (Math.random() - 0.5) * 0.015;
+    const z = (Math.random() - 0.5) * 0.04;
+    p.set([x, y + band, z], i * 3);
+  }
+  return p;
+};
+
+const dna: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const height = 0.82;
+  const radius = 0.14;
+  const turns = 3;
+  for (let i = 0; i < count; i++) {
+    const r = Math.random();
+    const y = (r - 0.5) * height;
+    const angle = r * turns * Math.PI * 2;
+    if (Math.random() < 0.82) {
+      const a = angle + (Math.random() < 0.5 ? 0 : Math.PI);
+      const j = (Math.random() - 0.5) * 0.01;
+      p.set([Math.cos(a) * radius + j, y, Math.sin(a) * radius + j], i * 3);
+    } else {
+      const t2 = Math.random();
+      const x1 = Math.cos(angle) * radius;
+      const z1 = Math.sin(angle) * radius;
+      const x2 = Math.cos(angle + Math.PI) * radius;
+      const z2 = Math.sin(angle + Math.PI) * radius;
+      p.set([x1 + (x2 - x1) * t2, y, z1 + (z2 - z1) * t2], i * 3);
+    }
+  }
+  return p;
+};
+
+const cross: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const arm = 0.4;
+  const w = 0.14;
+  const th = 0.09;
+  for (let i = 0; i < count; i++) {
+    const vert = Math.random() < 0.5;
+    const x = (Math.random() * 2 - 1) * (vert ? w : arm);
+    const y = (Math.random() * 2 - 1) * (vert ? arm : w);
+    const z = (Math.random() * 2 - 1) * th;
+    p.set([x, y, z], i * 3);
+  }
+  return p;
+};
+
+// ------------------- Raytheon (radar / aerospace / RF) -------------------
+
+const radar: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const ringCount = 4;
+  for (let i = 0; i < count; i++) {
+    const roll = Math.random();
+    if (roll < 0.8) {
+      const ring = 1 + Math.floor(Math.random() * ringCount);
+      const rad = (ring / ringCount) * 0.42;
+      const a = Math.random() * Math.PI * 2;
+      const j = (Math.random() - 0.5) * 0.008;
+      p.set(
+        [
+          Math.cos(a) * (rad + j),
+          (Math.random() - 0.5) * 0.02,
+          Math.sin(a) * (rad + j),
+        ],
+        i * 3,
+      );
+    } else {
+      const d = Math.random() * 0.42;
+      const ang = roll < 0.9 ? 0.7 : Math.PI / 2; // sweep spoke + crosshair
+      p.set([Math.cos(ang) * d, (Math.random() - 0.5) * 0.02, Math.sin(ang) * d], i * 3);
+    }
+  }
+  return p;
+};
+
+const orbit: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const tilt = 0.5;
+  const R = 0.4;
+  for (let i = 0; i < count; i++) {
+    const roll = Math.random();
+    if (roll < 0.4) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 0.15 * Math.cbrt(Math.random());
+      p.set(
+        [
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.sin(phi) * Math.sin(theta),
+          r * Math.cos(phi),
+        ],
+        i * 3,
+      );
+    } else {
+      const onRing = roll < 0.92;
+      const a = onRing ? Math.random() * Math.PI * 2 : 1.1 + (Math.random() - 0.5) * 0.3;
+      const spread = onRing ? 0.012 : 0.05;
+      const x = Math.cos(a) * R + (Math.random() - 0.5) * spread;
+      const y0 = (Math.random() - 0.5) * spread;
+      const z0 = Math.sin(a) * R + (Math.random() - 0.5) * spread;
+      p.set([x, y0 * Math.cos(tilt) - z0 * Math.sin(tilt), y0 * Math.sin(tilt) + z0 * Math.cos(tilt)], i * 3);
+    }
+  }
+  return p;
+};
+
+const signal: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const width = 0.92;
+  for (let i = 0; i < count; i++) {
+    const x = (Math.random() - 0.5) * width;
+    const y = (Math.sin(x * 20) * 0.5 + Math.sin(x * 9 + 1) * 0.3) * 0.22;
+    const band = (Math.random() - 0.5) * 0.015;
+    const z = (Math.random() - 0.5) * 0.04;
+    p.set([x, y + band, z], i * 3);
+  }
+  return p;
+};
+
+const globe: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const R = 0.42;
+  const latLines = 7;
+  const lonLines = 9;
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.5) {
+      const li = Math.floor(Math.random() * latLines);
+      const lat = (li / (latLines - 1) - 0.5) * Math.PI * 0.9;
+      const lon = Math.random() * Math.PI * 2;
+      p.set(
+        [R * Math.cos(lat) * Math.cos(lon), R * Math.sin(lat), R * Math.cos(lat) * Math.sin(lon)],
+        i * 3,
+      );
+    } else {
+      const lj = Math.floor(Math.random() * lonLines);
+      const lon = (lj / lonLines) * Math.PI * 2;
+      const lat = (Math.random() - 0.5) * Math.PI;
+      p.set(
+        [R * Math.cos(lat) * Math.cos(lon), R * Math.sin(lat), R * Math.cos(lat) * Math.sin(lon)],
+        i * 3,
+      );
+    }
+  }
+  return p;
+};
+
+type ShapeDef = { name: string; build: Build };
+const THEMES: Record<"default" | "medtronic" | "raytheon", ShapeDef[]> = {
+  default: [
+    { name: "Orb", build: sphere },
+    { name: "Galaxy", build: galaxy },
+    { name: "Torus", build: torus },
+    { name: "Cube", build: cube },
+    { name: "Grid", build: grid },
+    { name: "Wave", build: wave },
+  ],
+  medtronic: [
+    { name: "Heart", build: heart },
+    { name: "Pulse", build: heartbeat },
+    { name: "DNA", build: dna },
+    { name: "Cross", build: cross },
+  ],
+  raytheon: [
+    { name: "Radar", build: radar },
+    { name: "Orbit", build: orbit },
+    { name: "Signal", build: signal },
+    { name: "Globe", build: globe },
+  ],
+};
+type ThemeKey = keyof typeof THEMES;
 
 function easeInOutCubic(x: number) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -163,56 +361,68 @@ function easeInOutCubic(x: number) {
 
 type ParticlesProps = {
   count: number;
+  theme: ThemeKey;
   active: number;
   reducedMotion: boolean;
 };
 
-const MorphingParticles = ({ count, active, reducedMotion }: ParticlesProps) => {
+const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesProps) => {
   const points = useRef<Points<BufferGeometry, ShaderMaterial>>(null!);
 
-  // Build every shape once (lazy initializer keeps the RNG out of render).
-  const [shapes] = useState(() => SHAPES.map((s) => s.build(count)));
-  const [renderBuffer] = useState(() => shapes[0]!.slice());
+  // Build every shape of every theme once (lazy initializer keeps RNG out of render).
+  const [sets] = useState<Record<ThemeKey, Float32Array[]>>(() => ({
+    default: THEMES.default.map((s) => s.build(count)),
+    medtronic: THEMES.medtronic.map((s) => s.build(count)),
+    raytheon: THEMES.raytheon.map((s) => s.build(count)),
+  }));
+  const [renderBuffer] = useState(() => sets.default[0]!.slice());
 
   const uniforms = useMemo(
     () => ({ uTime: { value: 0 }, uRadius: { value: 0.5 } }),
     [],
   );
 
-  // Tracks the in-flight morph: which shape we're showing and the lerp source.
-  const morph = useRef({ shown: 0, from: shapes[0]!.slice(), t: 1 });
+  const morph = useRef({
+    theme: "default" as ThemeKey,
+    idx: 0,
+    from: new Float32Array(count * 3),
+    t: 1,
+  });
 
   useFrame((state, delta) => {
     const attr = points.current?.geometry.attributes.position;
     if (!attr) return;
     const arr = attr.array as Float32Array;
+    const set = sets[theme];
+    const idx = active % set.length;
+    const target = set[idx];
+    if (!target) return;
     const m = morph.current;
 
     if (reducedMotion) {
-      // Snap to the active shape, no animation or shimmer.
-      if (m.shown !== active) {
-        arr.set(shapes[active]!);
+      if (m.theme !== theme || m.idx !== idx) {
+        arr.set(target);
         attr.needsUpdate = true;
-        m.shown = active;
+        m.theme = theme;
+        m.idx = idx;
       }
       return;
     }
 
-    const dt = Math.min(delta, 0.05); // clamp to avoid jumps after tab refocus
+    const dt = Math.min(delta, 0.05);
     const uTime = points.current?.material.uniforms.uTime;
     if (uTime) uTime.value = state.clock.elapsedTime;
 
-    // Active changed → start a fresh morph from wherever we currently are.
-    if (m.shown !== active) {
+    if (m.theme !== theme || m.idx !== idx) {
       m.from.set(arr);
-      m.shown = active;
+      m.theme = theme;
+      m.idx = idx;
       m.t = 0;
     }
 
     if (m.t < 1) {
       m.t = Math.min(1, m.t + dt / MORPH_SECONDS);
       const f = easeInOutCubic(m.t);
-      const target = shapes[active]!;
       for (let i = 0; i < arr.length; i++)
         arr[i] = m.from[i]! + (target[i]! - m.from[i]!) * f;
       attr.needsUpdate = true;
@@ -237,19 +447,18 @@ const MorphingParticles = ({ count, active, reducedMotion }: ParticlesProps) => 
 
 export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { theme: ctxTheme } = useParticleTheme();
+  const theme: ThemeKey = ctxTheme ?? "default";
+  const shapes = THEMES[theme];
   const [active, setActive] = useState(0);
 
-  // Auto-cycle through shapes; a manual pick (below) resets the timer because
-  // `active` is a dependency, so the field dwells on a chosen shape before
-  // resuming.
+  // Auto-cycle within the current theme; a manual pick resets the timer.
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const id = setInterval(
-      () => setActive((a) => (a + 1) % SHAPES.length),
-      CYCLE_MS,
-    );
+    const len = THEMES[theme].length;
+    const id = setInterval(() => setActive((a) => (a + 1) % len), CYCLE_MS);
     return () => clearInterval(id);
-  }, [prefersReducedMotion, active]);
+  }, [prefersReducedMotion, active, theme]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -259,12 +468,14 @@ export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
     void animate(fade_in_sequence);
   }, [prefersReducedMotion]);
 
+  const activeIdx = active % shapes.length;
+
   return (
     <div className="flex w-full flex-col items-center gap-3">
       <div
         aria-hidden="true"
         title="Drag to rotate · scroll to zoom · click to change shape"
-        onClick={() => setActive((a) => (a + 1) % SHAPES.length)}
+        onClick={() => setActive((a) => (a + 1) % THEMES[theme].length)}
         className="particle-display flex aspect-square w-full max-w-[320px] items-center justify-center lg:max-w-[420px]"
       >
         <Canvas
@@ -282,6 +493,7 @@ export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
           />
           <MorphingParticles
             count={count}
+            theme={theme}
             active={active}
             reducedMotion={prefersReducedMotion}
           />
@@ -293,14 +505,14 @@ export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
         aria-label="Particle shape"
         className="flex flex-wrap justify-center gap-1.5"
       >
-        {SHAPES.map((s, i) => (
+        {shapes.map((s, i) => (
           <button
             key={s.name}
             type="button"
             onClick={() => setActive(i)}
-            aria-pressed={active === i}
+            aria-pressed={activeIdx === i}
             className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-              active === i
+              activeIdx === i
                 ? "bg-[#5786F5]/30 text-white"
                 : "bg-[#6071e2]/10 text-zinc-400 hover:text-white"
             }`}

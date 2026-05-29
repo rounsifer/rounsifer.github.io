@@ -52,7 +52,14 @@ const browser = await chromium.launch({
 // Console errors that are expected noise on a GPU-less SwiftShader runner or
 // from static-export quirks — everything else is treated as fatal.
 const BENIGN =
-  /favicon|swiftshader|software webgl|performance caveat|automatic fallback|GroupMarkerNotSet|Failed to load resource.*404/i;
+  /favicon|swiftshader|software webgl|performance caveat|automatic fallback|GroupMarkerNotSet|Failed to load resource.*404|WebGL context could not be created|could not create a webgl context|BindToCurrentSequence/i;
+
+// A GPU-less runner can fail to *create* a WebGL context — that's environmental,
+// not a code regression, so it must not hard-fail the gate (the page still
+// renders; `name visible` + `cursorGlow` remain the real signals). Covers both
+// console errors and the pageerror three.js throws.
+const WEBGL_ENV_FAILURE =
+  /Error creating WebGL|WebGL context could not be created|could not create a webgl context|BindToCurrentSequence/i;
 
 async function check(label, { reducedMotion, viewport, shot }) {
   const page = await browser.newPage(viewport ? { viewport } : undefined);
@@ -97,17 +104,29 @@ async function check(label, { reducedMotion, viewport, shot }) {
   if (shot) await page.screenshot({ path: shot, fullPage: true });
   await page.close();
 
-  const badConsole = consoleErrors.filter((e) => !BENIGN.test(e));
+  const webglEnvFailure =
+    consoleErrors.some((e) => WEBGL_ENV_FAILURE.test(e)) ||
+    pageErrors.some((e) => WEBGL_ENV_FAILURE.test(e));
+  const badConsole = consoleErrors.filter(
+    (e) => !BENIGN.test(e) && !WEBGL_ENV_FAILURE.test(e),
+  );
+  const badPageErrors = pageErrors.filter((e) => !WEBGL_ENV_FAILURE.test(e));
   const fatal =
-    pageErrors.length > 0 ||
+    badPageErrors.length > 0 ||
     badConsole.length > 0 ||
     !nameVisible ||
-    !glHealthy ||
-    !cursorGlowOk;
+    !cursorGlowOk ||
+    (!glHealthy && !webglEnvFailure); // dead context is only fatal if WebGL *could* init
 
   console.log(`--- ${label} ---`);
-  console.log("name visible:", nameVisible, "| canvas:", canvasCount, "| glHealthy:", glHealthy, "| cursorGlow:", cursorGlowOk);
-  console.log("pageErrors:", pageErrors.length ? pageErrors : "none");
+  console.log(
+    "name visible:", nameVisible,
+    "| canvas:", canvasCount,
+    "| glHealthy:", glHealthy,
+    "| cursorGlow:", cursorGlowOk,
+    webglEnvFailure ? "| (WebGL unavailable — environmental, ignored)" : "",
+  );
+  console.log("pageErrors (real):", badPageErrors.length ? badPageErrors : "none");
   console.log("console errors (non-benign):", badConsole.length ? badConsole : "none");
   return !fatal;
 }
