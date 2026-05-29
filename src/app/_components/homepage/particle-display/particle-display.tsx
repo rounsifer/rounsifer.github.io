@@ -18,7 +18,7 @@ import fragmentShader from "./shaders/fragmentShader.glsl";
 
 const RADIUS = 0.45;
 const MORPH_SECONDS = 1.6;
-const CYCLE_MS = 4200;
+const CYCLE_MS = 8000; // ms each shape holds before morphing to the next
 
 // --- Background tuning knobs (safe to change by number) ---
 const COUNT = 65000; // particle count — higher = denser, bigger-feeling shapes
@@ -195,28 +195,22 @@ const heartbeat: Build = (count) => {
   return p;
 };
 
-const dna: Build = (count) => {
+// Capsule / pill: a filled capsule along the x-axis (rejection-sampled volume).
+const pill: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const height = 0.86;
-  const R = 0.2; // wider helix so the two strands clearly separate
-  const turns = 2.0; // more open spiral
-  const rungCount = 14;
-  for (let i = 0; i < count; i++) {
-    if (Math.random() < 0.8) {
-      // Two backbone strands, 180 deg apart, winding down the y axis.
-      const t = Math.random();
-      const y = (t - 0.5) * height;
-      const angle = t * turns * Math.PI * 2 + (Math.random() < 0.5 ? 0 : Math.PI);
-      const j = (Math.random() - 0.5) * 0.006;
-      p.set([Math.cos(angle) * R + j, y, Math.sin(angle) * R + j], i * 3);
-    } else {
-      // Discrete ladder rungs connecting the two strands.
-      const step = Math.floor(Math.random() * rungCount);
-      const t = step / (rungCount - 1);
-      const y = (t - 0.5) * height;
-      const angle = t * turns * Math.PI * 2;
-      const m = 1 - 2 * Math.random(); // -1..1: strand A -> center -> strand B
-      p.set([Math.cos(angle) * R * m, y, Math.sin(angle) * R * m], i * 3);
+  const half = 0.31; // half-length of the cylindrical body (clearly elongated)
+  const r = 0.1; // radius
+  let i = 0;
+  while (i < count) {
+    const x = (Math.random() * 2 - 1) * (half + r);
+    const y = (Math.random() * 2 - 1) * r;
+    const z = (Math.random() * 2 - 1) * r;
+    // distance to the central segment [-half, half] along x
+    const cx = Math.max(-half, Math.min(half, x));
+    const dx = x - cx;
+    if (dx * dx + y * y + z * z <= r * r) {
+      p.set([x, y, z], i * 3);
+      i++;
     }
   }
   return p;
@@ -350,7 +344,7 @@ const THEMES: Record<"default" | "medtronic" | "raytheon", ShapeDef[]> = {
   medtronic: [
     { name: "Heart", build: heart },
     { name: "Pulse", build: heartbeat },
-    { name: "DNA", build: dna },
+    { name: "Pill", build: pill },
     { name: "Cross", build: cross },
   ],
   raytheon: [
