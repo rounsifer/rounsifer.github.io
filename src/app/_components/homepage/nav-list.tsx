@@ -42,7 +42,7 @@ export default function NavList() {
           </Link>
         </h1>
         <h2 className="text-lg font-medium">Senior Software Engineer</h2>
-        <p className="my-tagline mt-2 max-w-xs  leading-normal text-zinc-400 lg:mt-4">
+        <p className="my-tagline mt-2 max-w-xs  leading-normal text-zinc-300 lg:mt-4">
           I design and build highly performant, mission-critical systems for all
           domains.
         </p>
@@ -55,7 +55,7 @@ export default function NavList() {
         <ParticleDisplay />
       </div>
 
-      <div className="flex flex-row justify-center px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/50 w-full">
+      <div className="flex flex-row justify-center px-4 border p-2.5 rounded-b-lg bg-slate-800/20 border-zinc-800 text-sm font-light text-white/75 w-full">
         <a
           href={"https://ieeexplore.ieee.org/author/37087008577"}
           target="_blank"
@@ -67,7 +67,7 @@ export default function NavList() {
       </div>
 
       <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">
-        <li className="text-zinc-500">
+        <li className="text-zinc-400">
           <a
             href="https://github.com/rounsifer"
             target="_blank"
@@ -89,7 +89,7 @@ export default function NavList() {
             </svg>
           </a>
         </li>
-        <li className="text-zinc-500">
+        <li className="text-zinc-400">
           <a
             href="https://www.linkedin.com/in/ronaldrounsifer/"
             target="_blank"
@@ -120,7 +120,7 @@ export default function NavList() {
           </a>
         </li>
 
-        <li className="text-zinc-500">
+        <li className="text-zinc-400">
           <a href="mailto:ronrounsifer@gmail.com" aria-label="Email Ron">
             <svg
               xmlns="http://www.w3.org/2000/svg"
