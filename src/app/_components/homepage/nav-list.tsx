@@ -3,19 +3,9 @@
 import { useEffect } from "react";
 import { animate, type AnimationSequence } from "motion";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
-
-// The Three.js <Canvas> relies on react-reconciler, which can't be server-rendered
-// during Next's static export (it reads React internals that are undefined on the
-// server). Load it browser-only so the rest of the page still prerenders.
-const ParticleDisplay = dynamic(
-  () =>
-    import("./particle-display/particle-display").then((m) => m.ParticleDisplay),
-  { ssr: false },
-);
 
 export default function NavList() {
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -46,16 +36,6 @@ export default function NavList() {
           I design and build highly performant, mission-critical systems for all
           domains.
         </p>
-      </div>
-
-      {/* Single particle canvas kept in one stable DOM position (so its WebGL
-          context never remounts): shown up top on mobile via order-first, and
-          inside the framed box on desktop. */}
-      {/* Single particle canvas kept in one stable DOM position (so its WebGL
-          context never remounts): shown up top on mobile via order-first, and
-          inside the framed card on desktop. */}
-      <div className="order-first mb-12 flex justify-center lg:order-none lg:mb-0 lg:mt-10 lg:rounded-lg lg:border lg:border-zinc-800 lg:bg-slate-800/10 lg:p-4">
-        <ParticleDisplay />
       </div>
 
       <ul className="social-links mt-4 flex w-full flex-row justify-evenly lg:mt-8">

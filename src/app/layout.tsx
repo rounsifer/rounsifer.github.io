@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`font-sans ${inter.variable} no-scrollbar overflow-x-hidden overflow-y-scroll lg:overflow-hidden`}
+        className={`font-sans ${inter.variable} no-scrollbar overflow-x-hidden overflow-y-scroll bg-zinc-900 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] lg:overflow-hidden`}
       >
         <a
           href="#experience"
