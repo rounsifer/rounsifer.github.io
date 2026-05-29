@@ -49,7 +49,10 @@ const browser = await chromium.launch({
   args: ["--enable-unsafe-swiftshader"],
 });
 
-const FATAL = /ReactCurrentBatchConfig|is not defined|Cannot read prop/i;
+// Console errors that are expected noise on a GPU-less SwiftShader runner or
+// from static-export quirks — everything else is treated as fatal.
+const BENIGN =
+  /favicon|swiftshader|software webgl|performance caveat|automatic fallback|GroupMarkerNotSet|Failed to load resource.*404/i;
 
 async function check(label, { reducedMotion, viewport, shot }) {
   const page = await browser.newPage(viewport ? { viewport } : undefined);
@@ -72,18 +75,40 @@ async function check(label, { reducedMotion, viewport, shot }) {
     .isVisible()
     .catch(() => false);
 
+  // The <canvas> mounts even when WebGL fails, so assert a live, non-lost
+  // WebGL context rather than just the element's presence.
+  const glHealthy = await page.evaluate(() => {
+    const c = document.querySelector("canvas");
+    if (!c) return false;
+    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    return !!gl && !gl.isContextLost();
+  });
+
+  // Show the custom cursor and confirm its glow filter actually renders
+  // (a broken drop-shadow token collapses to filter: none).
+  await page.mouse.move(120, 120);
+  await page.mouse.move(220, 240);
+  const cursorFilter = await page.evaluate(() => {
+    const el = document.querySelector(".custom-cursor");
+    return el ? getComputedStyle(el).filter : "missing";
+  });
+  const cursorGlowOk = cursorFilter !== "none" && cursorFilter !== "missing";
+
   if (shot) await page.screenshot({ path: shot, fullPage: true });
   await page.close();
 
+  const badConsole = consoleErrors.filter((e) => !BENIGN.test(e));
   const fatal =
     pageErrors.length > 0 ||
-    consoleErrors.some((e) => FATAL.test(e)) ||
-    !nameVisible;
+    badConsole.length > 0 ||
+    !nameVisible ||
+    !glHealthy ||
+    !cursorGlowOk;
 
   console.log(`--- ${label} ---`);
-  console.log("name 'Ron Rounsifer' visible:", nameVisible, "| canvas:", canvasCount);
+  console.log("name visible:", nameVisible, "| canvas:", canvasCount, "| glHealthy:", glHealthy, "| cursorGlow:", cursorGlowOk);
   console.log("pageErrors:", pageErrors.length ? pageErrors : "none");
-  console.log("consoleErrors:", consoleErrors.length ? consoleErrors : "none");
+  console.log("console errors (non-benign):", badConsole.length ? badConsole : "none");
   return !fatal;
 }
 
