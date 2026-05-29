@@ -285,7 +285,8 @@ const globe: Build = (count) => {
 // mutates the buffer while the shape is on screen (so it can move/flow).
 type ShapeInstance = {
   positions: Float32Array;
-  animate?: (buf: Float32Array, t: number) => void;
+  anim?: number; // 0/undefined none, 1 swarm, 2 filter, 3 graph (applied in shader)
+  flow?: Float32Array; // graph: per-particle vec4 (edge vector xyz + start phase w)
 };
 type Factory = (count: number) => ShapeInstance;
 
@@ -315,70 +316,49 @@ const graphFactory: Factory = (count) => {
       edges.push([k, (k + 1 + Math.floor(Math.random() * (NODES - 1))) % NODES]);
     }
   }
-  const isEdge = new Uint8Array(count);
-  const ref = new Int32Array(count);
-  const phase = new Float32Array(count);
   const positions = new Float32Array(count * 3);
+  const flow = new Float32Array(count * 4); // edge particles: vec(xyz) + phase(w)
   for (let i = 0; i < count; i++) {
     if (Math.random() < 0.32) {
+      // node particle (static; flow stays 0)
       const n = nodes[Math.floor(Math.random() * NODES)]!;
       positions[i * 3] = n[0] + (Math.random() - 0.5) * 0.03;
       positions[i * 3 + 1] = n[1] + (Math.random() - 0.5) * 0.03;
       positions[i * 3 + 2] = n[2] + (Math.random() - 0.5) * 0.03;
     } else {
-      isEdge[i] = 1;
-      ref[i] = Math.floor(Math.random() * edges.length);
-      phase[i] = Math.random();
+      // edge particle: base at `phase` along the edge; shader slides it along
+      const e = edges[Math.floor(Math.random() * edges.length)]!;
+      const a = nodes[e[0]]!;
+      const b = nodes[e[1]]!;
+      const phase = Math.random();
+      const vx = b[0] - a[0];
+      const vy = b[1] - a[1];
+      const vz = b[2] - a[2];
+      positions[i * 3] = a[0] + vx * phase;
+      positions[i * 3 + 1] = a[1] + vy * phase;
+      positions[i * 3 + 2] = a[2] + vz * phase;
+      flow[i * 4] = vx;
+      flow[i * 4 + 1] = vy;
+      flow[i * 4 + 2] = vz;
+      flow[i * 4 + 3] = phase;
     }
   }
-  const animate = (buf: Float32Array, t: number) => {
-    for (let i = 0; i < count; i++) {
-      if (isEdge[i]) {
-        const e = edges[ref[i]!]!;
-        const a = nodes[e[0]]!;
-        const b = nodes[e[1]]!;
-        const f = (phase[i]! + t * 0.18) % 1; // packet position along the edge
-        buf[i * 3] = a[0] + (b[0] - a[0]) * f;
-        buf[i * 3 + 1] = a[1] + (b[1] - a[1]) * f;
-        buf[i * 3 + 2] = a[2] + (b[2] - a[2]) * f;
-      }
-    }
-  };
-  animate(positions, 0);
-  return { positions, animate };
+  return { positions, anim: 3, flow };
 };
 
 // Drone swarm: a cohesive body of agents that coherently drift and jostle.
 const swarmFactory: Factory = (count) => {
-  const base = new Float32Array(count * 3);
-  const seed = new Float32Array(count * 3);
+  const positions = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const th = Math.random() * Math.PI * 2;
     const ph = Math.acos(2 * Math.random() - 1);
     const r = 0.34 * Math.cbrt(Math.random());
-    base[i * 3] = r * Math.sin(ph) * Math.cos(th) * 1.25; // elongated forward
-    base[i * 3 + 1] = r * Math.cos(ph) * 0.8;
-    base[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
-    seed[i * 3] = Math.random() * Math.PI * 2;
-    seed[i * 3 + 1] = Math.random() * Math.PI * 2;
-    seed[i * 3 + 2] = Math.random() * Math.PI * 2;
+    positions[i * 3] = r * Math.sin(ph) * Math.cos(th) * 1.25; // elongated forward
+    positions[i * 3 + 1] = r * Math.cos(ph) * 0.8;
+    positions[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
   }
-  const positions = new Float32Array(count * 3);
-  const animate = (buf: Float32Array, t: number) => {
-    const gx = Math.sin(t * 0.6) * 0.05; // coherent group drift
-    const gy = Math.sin(t * 0.5 + 1.3) * 0.04;
-    const gz = Math.cos(t * 0.45) * 0.05;
-    const amp = 0.025; // per-agent jitter
-    for (let i = 0; i < count; i++) {
-      buf[i * 3] = base[i * 3]! + gx + Math.sin(t * 1.4 + seed[i * 3]!) * amp;
-      buf[i * 3 + 1] =
-        base[i * 3 + 1]! + gy + Math.sin(t * 1.7 + seed[i * 3 + 1]!) * amp;
-      buf[i * 3 + 2] =
-        base[i * 3 + 2]! + gz + Math.sin(t * 1.2 + seed[i * 3 + 2]!) * amp;
-    }
-  };
-  animate(positions, 0);
-  return { positions, animate };
+  // Group drift + per-agent jitter are applied in the shader (uses aSeed).
+  return { positions, anim: 1 };
 };
 
 // WiFi / wardriving: nested radiating arcs (a signal fan) from a source point.
@@ -418,7 +398,6 @@ const wifi: Build = (count) => {
 // Particle filter: a belief cloud (dense estimate + diffuse uncertainty +
 // competing hypotheses) that periodically converges/resamples toward the estimate.
 const particleFilterFactory: Factory = (count) => {
-  const base = new Float32Array(count * 3);
   const centers: [number, number, number][] = [
     [0, 0, 0],
     [0.22, 0.12, -0.1],
@@ -426,6 +405,7 @@ const particleFilterFactory: Factory = (count) => {
   ];
   const weights = [0.7, 0.18, 0.12];
   const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 0.66;
+  const positions = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const r = Math.random();
     let c = 0;
@@ -439,18 +419,12 @@ const particleFilterFactory: Factory = (count) => {
     }
     const center = centers[c]!;
     const sd = c === 0 ? 0.14 : 0.09;
-    base[i * 3] = center[0] + gauss() * sd;
-    base[i * 3 + 1] = center[1] + gauss() * sd;
-    base[i * 3 + 2] = center[2] + gauss() * sd;
+    positions[i * 3] = center[0] + gauss() * sd;
+    positions[i * 3 + 1] = center[1] + gauss() * sd;
+    positions[i * 3 + 2] = center[2] + gauss() * sd;
   }
-  const positions = new Float32Array(count * 3);
-  const animate = (buf: Float32Array, t: number) => {
-    const converge = Math.max(0, Math.sin(t * 0.5)) * 0.5; // resampling pulse
-    const k = 1 - converge;
-    for (let i = 0; i < count * 3; i++) buf[i] = base[i]! * k;
-  };
-  animate(positions, 0);
-  return { positions, animate };
+  // The converge/resample pulse is applied in the shader.
+  return { positions, anim: 2 };
 };
 
 type ShapeDef = { name: string; factory: Factory };
@@ -499,8 +473,25 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
   }));
   const [renderBuffer] = useState(() => sets.default[0]!.positions.slice());
 
+  // Per-particle attributes for the GPU animations: a phase seed (swarm jitter)
+  // and the graph's per-particle edge vectors + start phase (from whichever
+  // default shape provides `flow`).
+  const [aSeed] = useState(() => {
+    const s = new Float32Array(count * 3);
+    for (let i = 0; i < s.length; i++) s[i] = Math.random() * Math.PI * 2;
+    return s;
+  });
+  const [aFlow] = useState(
+    () => sets.default.find((s) => s.flow)?.flow ?? new Float32Array(count * 4),
+  );
+
   const uniforms = useMemo(
-    () => ({ uTime: { value: 0 }, uRadius: { value: 0.5 } }),
+    () => ({
+      uTime: { value: 0 },
+      uRadius: { value: 0.5 },
+      uAnim: { value: 0 },
+      uAnimTime: { value: 0 },
+    }),
     [],
   );
 
@@ -548,17 +539,21 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     }
 
     if (m.t < 1) {
+      // Morphing: lerp positions on the CPU; shape animation is off mid-morph.
       m.t = Math.min(1, m.t + dt / MORPH_SECONDS);
       const f = easeInOutCubic(m.t);
       for (let i = 0; i < arr.length; i++)
         arr[i] = m.from[i]! + (target[i]! - m.from[i]!) * f;
       attr.needsUpdate = true;
+      const uAnim = points.current?.material.uniforms.uAnim;
+      if (uAnim) uAnim.value = 0;
       if (m.t >= 1) m.restStart = elapsed; // mark when the shape settles
-    } else if (shape.animate) {
-      // Animated shapes keep moving while displayed (local time keeps the
-      // hand-off from the morph seamless, since animate(buf, 0) === positions).
-      shape.animate(arr, elapsed - m.restStart);
-      attr.needsUpdate = true;
+    } else {
+      // At rest: the shape's animation runs on the GPU via uniforms — no
+      // per-frame buffer upload (the key fix for mobile).
+      const u = points.current?.material.uniforms;
+      if (u?.uAnim) u.uAnim.value = shape.anim ?? 0;
+      if (u?.uAnimTime) u.uAnimTime.value = elapsed - m.restStart;
     }
   });
 
@@ -566,6 +561,8 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     <points ref={points}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[renderBuffer, 3]} />
+        <bufferAttribute attach="attributes-aSeed" args={[aSeed, 3]} />
+        <bufferAttribute attach="attributes-aFlow" args={[aFlow, 4]} />
       </bufferGeometry>
       <shaderMaterial
         depthWrite={false}
@@ -584,11 +581,19 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
  * it auto-cycles shapes and morphs to a company theme when an experience card
  * is hovered/focused (via ParticleThemeProvider).
  */
-export const ParticleBackground = ({ count = COUNT }: { count?: number }) => {
+export const ParticleBackground = () => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const { theme: ctxTheme } = useParticleTheme();
   const theme: ThemeKey = ctxTheme ?? "default";
   const [active, setActive] = useState(0);
+
+  // Detect the device after mount so we build the right particle count for it
+  // (never allocate the desktop-sized field on a phone) and cap the pixel ratio.
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time device probe
+    setIsMobile(window.matchMedia("(max-width: 820px)").matches);
+  }, []);
 
   // Auto-cycle through the active theme's shapes.
   useEffect(() => {
@@ -598,14 +603,26 @@ export const ParticleBackground = ({ count = COUNT }: { count?: number }) => {
     return () => clearInterval(id);
   }, [prefersReducedMotion, active, theme]);
 
-  // Gentle fade-in to the background opacity.
+  // Gentle fade-in to the background opacity (once the canvas mounts).
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isMobile === null) return;
     const fade: AnimationSequence = [
       [".particle-bg", { opacity: [0, BG_OPACITY] }, { duration: 3, at: 0 }],
     ];
     void animate(fade);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, isMobile]);
+
+  // Hold the canvas until the device is known (one tick).
+  if (isMobile === null) {
+    return (
+      <div
+        aria-hidden="true"
+        className="particle-bg pointer-events-none fixed inset-0 -z-10"
+      />
+    );
+  }
+
+  const count = isMobile ? 16000 : COUNT;
 
   return (
     <div
@@ -614,6 +631,8 @@ export const ParticleBackground = ({ count = COUNT }: { count?: number }) => {
       className="particle-bg pointer-events-none fixed inset-0 -z-10"
     >
       <Canvas
+        dpr={[1, isMobile ? 1.5 : 2]}
+        gl={{ antialias: false, powerPreference: "low-power" }}
         camera={{
           position: [1.5, 1.5, 1.5],
           fov: 50,
