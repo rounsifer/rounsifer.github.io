@@ -17,8 +17,8 @@ import vertexShader from "./shaders/vertexShader.glsl";
 import fragmentShader from "./shaders/fragmentShader.glsl";
 
 const RADIUS = 0.45;
-const HOLD_SECONDS = 2.2; // dwell on each shape
 const MORPH_SECONDS = 1.6; // transition time between shapes
+const CYCLE_MS = 4200; // auto-advance cadence
 
 // ---- Shape generators: each returns a Float32Array of `count` xyz points,
 // kept within ~RADIUS of the origin so the shader's size/colour math holds. ----
@@ -38,6 +38,46 @@ const sphere: Build = (count) => {
         r * Math.sin(phi) * Math.cos(theta),
         r * Math.sin(phi) * Math.sin(theta),
         r * Math.cos(phi),
+      ],
+      i * 3,
+    );
+  }
+  return p;
+};
+
+const galaxy: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const arms = 3;
+  for (let i = 0; i < count; i++) {
+    const t = Math.random();
+    const dist = t * 0.42;
+    const arm = Math.floor(Math.random() * arms);
+    const angle = arm * ((Math.PI * 2) / arms) + dist * 7.0;
+    const jitter = (Math.random() - 0.5) * 0.05;
+    p.set(
+      [
+        Math.cos(angle) * dist + jitter,
+        (Math.random() - 0.5) * 0.05 * (1 - t * 0.7),
+        Math.sin(angle) * dist + jitter,
+      ],
+      i * 3,
+    );
+  }
+  return p;
+};
+
+const torus: Build = (count) => {
+  const p = new Float32Array(count * 3);
+  const R = 0.3;
+  const r = 0.12;
+  for (let i = 0; i < count; i++) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI * 2;
+    p.set(
+      [
+        (R + r * Math.cos(v)) * Math.cos(u),
+        r * Math.sin(v),
+        (R + r * Math.cos(v)) * Math.sin(u),
       ],
       i * 3,
     );
@@ -69,18 +109,24 @@ const cube: Build = (count) => {
   return p;
 };
 
-const torus: Build = (count) => {
+// 3D lattice — particles cluster tightly at each grid node so it reads as a
+// crisp data cube / matrix of points rather than a fuzzy cloud.
+const grid: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const R = 0.3;
-  const r = 0.12;
+  const n = 9; // 9 x 9 x 9 = 729 nodes
+  const nodes = n * n * n;
+  const span = 0.74;
+  const jitter = 0.008;
   for (let i = 0; i < count; i++) {
-    const u = Math.random() * Math.PI * 2;
-    const v = Math.random() * Math.PI * 2;
+    const node = i % nodes; // spread particles evenly across nodes
+    const ix = node % n;
+    const iy = Math.floor(node / n) % n;
+    const iz = Math.floor(node / (n * n)) % n;
     p.set(
       [
-        (R + r * Math.cos(v)) * Math.cos(u),
-        r * Math.sin(v),
-        (R + r * Math.cos(v)) * Math.sin(u),
+        (ix / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
+        (iy / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
+        (iz / (n - 1) - 0.5) * span + (Math.random() - 0.5) * jitter,
       ],
       i * 3,
     );
@@ -88,28 +134,28 @@ const torus: Build = (count) => {
   return p;
 };
 
-const galaxy: Build = (count) => {
+// Rippling surface — reads like a signal / waveform.
+const wave: Build = (count) => {
   const p = new Float32Array(count * 3);
-  const arms = 3;
+  const span = 0.82;
   for (let i = 0; i < count; i++) {
-    const t = Math.random();
-    const dist = t * 0.42;
-    const arm = Math.floor(Math.random() * arms);
-    const angle = arm * ((Math.PI * 2) / arms) + dist * 7.0;
-    const jitter = (Math.random() - 0.5) * 0.05;
-    p.set(
-      [
-        Math.cos(angle) * dist + jitter,
-        (Math.random() - 0.5) * 0.05 * (1 - t * 0.7),
-        Math.sin(angle) * dist + jitter,
-      ],
-      i * 3,
-    );
+    const x = (Math.random() - 0.5) * span;
+    const z = (Math.random() - 0.5) * span;
+    const d = Math.sqrt(x * x + z * z);
+    const y = Math.sin(d * 16.0) * 0.07 + Math.sin(x * 10.0) * 0.02;
+    p.set([x, y, z], i * 3);
   }
   return p;
 };
 
-const SHAPE_BUILDERS: Build[] = [sphere, galaxy, torus, cube];
+const SHAPES: { name: string; build: Build }[] = [
+  { name: "Orb", build: sphere },
+  { name: "Galaxy", build: galaxy },
+  { name: "Torus", build: torus },
+  { name: "Cube", build: cube },
+  { name: "Grid", build: grid },
+  { name: "Wave", build: wave },
+];
 
 function easeInOutCubic(x: number) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -117,58 +163,58 @@ function easeInOutCubic(x: number) {
 
 type ParticlesProps = {
   count: number;
+  active: number;
   reducedMotion: boolean;
-  advanceRef: React.RefObject<boolean>;
 };
 
-const MorphingParticles = ({ count, reducedMotion, advanceRef }: ParticlesProps) => {
+const MorphingParticles = ({ count, active, reducedMotion }: ParticlesProps) => {
   const points = useRef<Points<BufferGeometry, ShaderMaterial>>(null!);
 
-  // Generate every shape once (lazy initializer keeps the RNG out of render).
-  const [shapes] = useState(() => SHAPE_BUILDERS.map((build) => build(count)));
-  const [render] = useState(() => shapes[0]!.slice()); // mutable buffer fed to the GPU
+  // Build every shape once (lazy initializer keeps the RNG out of render).
+  const [shapes] = useState(() => SHAPES.map((s) => s.build(count)));
+  const [renderBuffer] = useState(() => shapes[0]!.slice());
 
   const uniforms = useMemo(
     () => ({ uTime: { value: 0 }, uRadius: { value: 0.5 } }),
     [],
   );
 
-  const morph = useRef({ from: 0, to: 1 % shapes.length, t: 0, hold: HOLD_SECONDS });
+  // Tracks the in-flight morph: which shape we're showing and the lerp source.
+  const morph = useRef({ shown: 0, from: shapes[0]!.slice(), t: 1 });
 
   useFrame((state, delta) => {
-    // Reduced motion: freeze the field entirely (no shimmer, no morph).
-    if (reducedMotion) return;
+    const attr = points.current?.geometry.attributes.position;
+    if (!attr) return;
+    const arr = attr.array as Float32Array;
+    const m = morph.current;
+
+    if (reducedMotion) {
+      // Snap to the active shape, no animation or shimmer.
+      if (m.shown !== active) {
+        arr.set(shapes[active]!);
+        attr.needsUpdate = true;
+        m.shown = active;
+      }
+      return;
+    }
 
     const dt = Math.min(delta, 0.05); // clamp to avoid jumps after tab refocus
-    // Mutate via the material ref (not the memoized uniforms object directly).
     const uTime = points.current?.material.uniforms.uTime;
     if (uTime) uTime.value = state.clock.elapsedTime;
 
-    const m = morph.current;
-    if (advanceRef.current) {
-      advanceRef.current = false;
-      m.hold = 0; // a click skips the remaining dwell
+    // Active changed → start a fresh morph from wherever we currently are.
+    if (m.shown !== active) {
+      m.from.set(arr);
+      m.shown = active;
+      m.t = 0;
     }
 
-    if (m.hold > 0) {
-      m.hold -= dt;
-    } else {
-      m.t += dt / MORPH_SECONDS;
-      if (m.t >= 1) {
-        m.t = 0;
-        m.from = m.to;
-        m.to = (m.to + 1) % shapes.length;
-        m.hold = HOLD_SECONDS;
-      }
-    }
-
-    const f = easeInOutCubic(Math.min(m.t, 1));
-    const attr = points.current?.geometry.attributes.position;
-    if (attr) {
-      const arr = attr.array as Float32Array;
-      const A = shapes[m.from]!;
-      const B = shapes[m.to]!;
-      for (let i = 0; i < arr.length; i++) arr[i] = A[i]! + (B[i]! - A[i]!) * f;
+    if (m.t < 1) {
+      m.t = Math.min(1, m.t + dt / MORPH_SECONDS);
+      const f = easeInOutCubic(m.t);
+      const target = shapes[active]!;
+      for (let i = 0; i < arr.length; i++)
+        arr[i] = m.from[i]! + (target[i]! - m.from[i]!) * f;
       attr.needsUpdate = true;
     }
   });
@@ -176,7 +222,7 @@ const MorphingParticles = ({ count, reducedMotion, advanceRef }: ParticlesProps)
   return (
     <points ref={points}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[render, 3]} />
+        <bufferAttribute attach="attributes-position" args={[renderBuffer, 3]} />
       </bufferGeometry>
       <shaderMaterial
         depthWrite={false}
@@ -191,7 +237,19 @@ const MorphingParticles = ({ count, reducedMotion, advanceRef }: ParticlesProps)
 
 export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const advanceRef = useRef(false);
+  const [active, setActive] = useState(0);
+
+  // Auto-cycle through shapes; a manual pick (below) resets the timer because
+  // `active` is a dependency, so the field dwells on a chosen shape before
+  // resuming.
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const id = setInterval(
+      () => setActive((a) => (a + 1) % SHAPES.length),
+      CYCLE_MS,
+    );
+    return () => clearInterval(id);
+  }, [prefersReducedMotion, active]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -202,33 +260,55 @@ export const ParticleDisplay = ({ count = 10000 }: { count?: number }) => {
   }, [prefersReducedMotion]);
 
   return (
-    <div
-      aria-hidden="true"
-      title="Drag to rotate · scroll to zoom · click to change shape"
-      onClick={() => {
-        advanceRef.current = true;
-      }}
-      className="particle-display flex aspect-square w-full max-w-[320px] items-center justify-center lg:max-w-[420px]"
-    >
-      <Canvas
-        camera={{ position: [1.5, 1.5, 1.5], fov: 50, near: 0.1, far: 100, zoom: 2.4 }}
+    <div className="flex w-full flex-col items-center gap-3">
+      <div
+        aria-hidden="true"
+        title="Drag to rotate · scroll to zoom · click to change shape"
+        onClick={() => setActive((a) => (a + 1) % SHAPES.length)}
+        className="particle-display flex aspect-square w-full max-w-[320px] items-center justify-center lg:max-w-[420px]"
       >
-        <OrbitControls
-          makeDefault
-          enablePan={false}
-          enableZoom
-          minDistance={1.2}
-          maxDistance={5}
-          enableDamping
-          autoRotate={!prefersReducedMotion}
-          autoRotateSpeed={0.6}
-        />
-        <MorphingParticles
-          count={count}
-          reducedMotion={prefersReducedMotion}
-          advanceRef={advanceRef}
-        />
-      </Canvas>
+        <Canvas
+          camera={{ position: [1.5, 1.5, 1.5], fov: 50, near: 0.1, far: 100, zoom: 2.4 }}
+        >
+          <OrbitControls
+            makeDefault
+            enablePan={false}
+            enableZoom
+            minDistance={1.2}
+            maxDistance={5}
+            enableDamping
+            autoRotate={!prefersReducedMotion}
+            autoRotateSpeed={0.6}
+          />
+          <MorphingParticles
+            count={count}
+            active={active}
+            reducedMotion={prefersReducedMotion}
+          />
+        </Canvas>
+      </div>
+
+      <div
+        role="group"
+        aria-label="Particle shape"
+        className="flex flex-wrap justify-center gap-1.5"
+      >
+        {SHAPES.map((s, i) => (
+          <button
+            key={s.name}
+            type="button"
+            onClick={() => setActive(i)}
+            aria-pressed={active === i}
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide transition-colors ${
+              active === i
+                ? "bg-[#5786F5]/30 text-white"
+                : "bg-[#6071e2]/10 text-zinc-400 hover:text-white"
+            }`}
+          >
+            {s.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
