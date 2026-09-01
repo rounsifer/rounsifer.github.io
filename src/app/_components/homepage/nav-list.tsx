@@ -41,25 +41,24 @@ export default function NavList() {
           I build safety- and mission-critical systems from silicon and embedded
           Linux through autonomy and full-stack tooling.
         </p>
+        <div className="resume-links mt-4 flex flex-wrap gap-2">
+          <Link
+            href="/resume"
+            className="rounded-lg bg-blue-400/15 px-3 py-2 text-sm font-medium text-blue-200 transition-colors hover:bg-blue-400/25 hover:text-blue-100"
+          >
+            View résumé
+          </Link>
+          <a
+            href={RESUME_PDF_URL}
+            download="Ron_Rounsifer_Resume.pdf"
+            className="rounded-lg border border-white/15 px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-blue-300/50 hover:text-blue-300"
+          >
+            Download PDF
+          </a>
+        </div>
       </div>
 
       <ParticleDisplay />
-
-      <div className="resume-links flex flex-wrap gap-2">
-        <Link
-          href="/resume"
-          className="rounded-lg bg-blue-400/15 px-3 py-2 text-sm font-medium text-blue-200 transition-colors hover:bg-blue-400/25 hover:text-blue-100"
-        >
-          View résumé
-        </Link>
-        <a
-          href={RESUME_PDF_URL}
-          download="Ron_Rounsifer_Resume.pdf"
-          className="rounded-lg border border-white/15 px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-blue-300/50 hover:text-blue-300"
-        >
-          Download PDF
-        </a>
-      </div>
 
       <ul className="social-links flex w-full flex-row justify-evenly">
         <li className="text-zinc-400">
