@@ -86,6 +86,26 @@ async function check(label, { reducedMotion, viewport, shot }) {
     .isVisible()
     .catch(() => false);
 
+  // The particle canvas belongs in the profile column and must never sit
+  // behind the experience copy. Check both its positioning mode and bounds.
+  const particleBox = await page.locator(".particle-display").boundingBox();
+  const experienceBox = await page.locator("#experience").boundingBox();
+  const particlePosition = await page
+    .locator(".particle-display")
+    .evaluate((element) => getComputedStyle(element).position)
+    .catch(() => "missing");
+  const particlesOverlapExperience =
+    particleBox !== null &&
+    experienceBox !== null &&
+    particleBox.x < experienceBox.x + experienceBox.width &&
+    particleBox.x + particleBox.width > experienceBox.x &&
+    particleBox.y < experienceBox.y + experienceBox.height &&
+    particleBox.y + particleBox.height > experienceBox.y;
+  const particlesContained =
+    particleBox !== null &&
+    particlePosition !== "fixed" &&
+    !particlesOverlapExperience;
+
   // The <canvas> mounts even when WebGL fails, so assert a live, non-lost
   // WebGL context rather than just the element's presence.
   const glHealthy = await page.evaluate(() => {
@@ -120,6 +140,7 @@ async function check(label, { reducedMotion, viewport, shot }) {
     badConsole.length > 0 ||
     !nameVisible ||
     !cursorGlowOk ||
+    !particlesContained ||
     (!glHealthy && !webglEnvFailure); // dead context is only fatal if WebGL *could* init
 
   console.log(`--- ${label} ---`);
@@ -132,6 +153,8 @@ async function check(label, { reducedMotion, viewport, shot }) {
     glHealthy,
     "| cursorGlow:",
     cursorGlowOk,
+    "| particles contained:",
+    particlesContained,
     webglEnvFailure ? "| (WebGL unavailable — environmental, ignored)" : "",
   );
   console.log(

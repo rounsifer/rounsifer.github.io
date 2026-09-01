@@ -20,10 +20,10 @@ const RADIUS = 0.45;
 const MORPH_SECONDS = 1.6;
 const CYCLE_MS = 8000; // ms each shape holds before morphing to the next
 
-// --- Background tuning knobs (safe to change by number) ---
-const COUNT = 65000; // particle count — higher = denser, bigger-feeling shapes
-const CAMERA_ZOOM = 4.0; // higher = the shape fills more of the screen
-const BG_OPACITY = 0.7; // overall background presence (readability vs presence)
+// --- Display tuning knobs (safe to change by number) ---
+const COUNT = 36000; // particle count — higher = denser, bigger-feeling shapes
+const CAMERA_ZOOM = 3.6; // higher = the shape fills more of the display
+const DISPLAY_OPACITY = 0.82;
 const AUTO_ROTATE = 0.12; // radians/sec the field slowly spins
 
 type Build = (count: number) => Float32Array;
@@ -202,7 +202,10 @@ const radar: Build = (count) => {
     } else {
       const d = Math.random() * 0.42;
       const ang = roll < 0.9 ? 0.7 : Math.PI / 2; // sweep spoke + crosshair
-      p.set([Math.cos(ang) * d, (Math.random() - 0.5) * 0.02, Math.sin(ang) * d], i * 3);
+      p.set(
+        [Math.cos(ang) * d, (Math.random() - 0.5) * 0.02, Math.sin(ang) * d],
+        i * 3,
+      );
     }
   }
   return p;
@@ -228,12 +231,21 @@ const orbit: Build = (count) => {
       );
     } else {
       const onRing = roll < 0.92;
-      const a = onRing ? Math.random() * Math.PI * 2 : 1.1 + (Math.random() - 0.5) * 0.3;
+      const a = onRing
+        ? Math.random() * Math.PI * 2
+        : 1.1 + (Math.random() - 0.5) * 0.3;
       const spread = onRing ? 0.012 : 0.05;
       const x = Math.cos(a) * R + (Math.random() - 0.5) * spread;
       const y0 = (Math.random() - 0.5) * spread;
       const z0 = Math.sin(a) * R + (Math.random() - 0.5) * spread;
-      p.set([x, y0 * Math.cos(tilt) - z0 * Math.sin(tilt), y0 * Math.sin(tilt) + z0 * Math.cos(tilt)], i * 3);
+      p.set(
+        [
+          x,
+          y0 * Math.cos(tilt) - z0 * Math.sin(tilt),
+          y0 * Math.sin(tilt) + z0 * Math.cos(tilt),
+        ],
+        i * 3,
+      );
     }
   }
   return p;
@@ -263,7 +275,11 @@ const globe: Build = (count) => {
       const lat = (li / (latLines - 1) - 0.5) * Math.PI * 0.9;
       const lon = Math.random() * Math.PI * 2;
       p.set(
-        [R * Math.cos(lat) * Math.cos(lon), R * Math.sin(lat), R * Math.cos(lat) * Math.sin(lon)],
+        [
+          R * Math.cos(lat) * Math.cos(lon),
+          R * Math.sin(lat),
+          R * Math.cos(lat) * Math.sin(lon),
+        ],
         i * 3,
       );
     } else {
@@ -271,7 +287,11 @@ const globe: Build = (count) => {
       const lon = (lj / lonLines) * Math.PI * 2;
       const lat = (Math.random() - 0.5) * Math.PI;
       p.set(
-        [R * Math.cos(lat) * Math.cos(lon), R * Math.sin(lat), R * Math.cos(lat) * Math.sin(lon)],
+        [
+          R * Math.cos(lat) * Math.cos(lon),
+          R * Math.sin(lat),
+          R * Math.cos(lat) * Math.sin(lon),
+        ],
         i * 3,
       );
     }
@@ -313,7 +333,10 @@ const graphFactory: Factory = (count) => {
   const edges: [number, number][] = [];
   for (let k = 0; k < NODES; k++) {
     for (let m = 0; m < 2; m++) {
-      edges.push([k, (k + 1 + Math.floor(Math.random() * (NODES - 1))) % NODES]);
+      edges.push([
+        k,
+        (k + 1 + Math.floor(Math.random() * (NODES - 1))) % NODES,
+      ]);
     }
   }
   const positions = new Float32Array(count * 3);
@@ -404,7 +427,8 @@ const particleFilterFactory: Factory = (count) => {
     [-0.18, -0.1, 0.14],
   ];
   const weights = [0.7, 0.18, 0.12];
-  const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 0.66;
+  const gauss = () =>
+    (Math.random() + Math.random() + Math.random() - 1.5) * 0.66;
   const positions = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const r = Math.random();
@@ -462,7 +486,12 @@ type ParticlesProps = {
   reducedMotion: boolean;
 };
 
-const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesProps) => {
+const MorphingParticles = ({
+  count,
+  theme,
+  active,
+  reducedMotion,
+}: ParticlesProps) => {
   const points = useRef<Points<BufferGeometry, ShaderMaterial>>(null!);
 
   // Build every shape of every theme once (lazy initializer keeps RNG out of render).
@@ -528,7 +557,7 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
     const dt = Math.min(delta, 0.05);
     const uTime = points.current?.material.uniforms.uTime;
     if (uTime) uTime.value = elapsed;
-    // Slow auto-spin (replaces OrbitControls autoRotate for the non-interactive bg).
+    // Slow auto-spin (replaces OrbitControls autoRotate for the non-interactive display).
     if (points.current) points.current.rotation.y += dt * AUTO_ROTATE;
 
     if (m.theme !== theme || m.idx !== idx) {
@@ -560,7 +589,10 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
   return (
     <points ref={points}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[renderBuffer, 3]} />
+        <bufferAttribute
+          attach="attributes-position"
+          args={[renderBuffer, 3]}
+        />
         <bufferAttribute attach="attributes-aSeed" args={[aSeed, 3]} />
         <bufferAttribute attach="attributes-aFlow" args={[aFlow, 4]} />
       </bufferGeometry>
@@ -576,12 +608,11 @@ const MorphingParticles = ({ count, theme, active, reducedMotion }: ParticlesPro
 };
 
 /**
- * Full-bleed ambient particle field rendered behind all page content.
- * Non-interactive (pointer-events: none) so the page scrolls/clicks normally;
- * it auto-cycles shapes and morphs to a company theme when an experience card
- * is hovered/focused (via ParticleThemeProvider).
+ * Contained particle display for the profile column. It auto-cycles shapes and
+ * morphs to a company theme when an experience card is hovered/focused (via
+ * ParticleThemeProvider) without sitting behind any résumé or experience text.
  */
-export const ParticleBackground = () => {
+export const ParticleDisplay = () => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const { theme: ctxTheme } = useParticleTheme();
   const theme: ThemeKey = ctxTheme ?? "default";
@@ -603,11 +634,15 @@ export const ParticleBackground = () => {
     return () => clearInterval(id);
   }, [prefersReducedMotion, active, theme]);
 
-  // Gentle fade-in to the background opacity (once the canvas mounts).
+  // Gentle fade-in once the canvas mounts.
   useEffect(() => {
     if (prefersReducedMotion || isMobile === null) return;
     const fade: AnimationSequence = [
-      [".particle-bg", { opacity: [0, BG_OPACITY] }, { duration: 3, at: 0 }],
+      [
+        ".particle-display",
+        { opacity: [0, DISPLAY_OPACITY] },
+        { duration: 2, at: 0 },
+      ],
     ];
     void animate(fade);
   }, [prefersReducedMotion, isMobile]);
@@ -617,18 +652,18 @@ export const ParticleBackground = () => {
     return (
       <div
         aria-hidden="true"
-        className="particle-bg pointer-events-none fixed inset-0 -z-10"
+        className="particle-display pointer-events-none h-48 w-full sm:h-56 lg:h-64"
       />
     );
   }
 
-  const count = isMobile ? 16000 : COUNT;
+  const count = isMobile ? 12000 : COUNT;
 
   return (
     <div
       aria-hidden="true"
-      style={{ opacity: BG_OPACITY }}
-      className="particle-bg pointer-events-none fixed inset-0 -z-10"
+      style={{ opacity: DISPLAY_OPACITY }}
+      className="particle-display pointer-events-none h-48 w-full sm:h-56 lg:h-64"
     >
       <Canvas
         dpr={[1, isMobile ? 1.5 : 2]}

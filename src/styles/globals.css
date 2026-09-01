@@ -118,3 +118,13 @@
 .resume-document a:hover {
   color: #bfdbfe;
 }
+
+/* Feather the contained particle canvas into the profile column without
+   letting it form a hard rectangular edge. */
+.particle-display {
+  mask-image: radial-gradient(
+    ellipse 86% 78% at center,
+    black 55%,
+    transparent 100%
+  );
+}
