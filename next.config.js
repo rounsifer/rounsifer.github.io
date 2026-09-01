@@ -7,6 +7,9 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   output: "export",
+  // Emit /route/index.html so nested routes work reliably on GitHub Pages and
+  // other static hosts that do not provide extensionless HTML rewrites.
+  trailingSlash: true,
   images: { unoptimized: true },
   reactStrictMode: true,
   // Import *.glsl shader files as raw strings.

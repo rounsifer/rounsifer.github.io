@@ -17,27 +17,26 @@ export default function Experience() {
   }, [prefersReducedMotion]);
 
   const jobHistory = [
-
     {
       id: "0",
-      title: "Senior Software Engineer",
+      title: "Senior Software Engineer / Software Lead",
       company: "Medtronic",
       url: "https://www.medtronic.com/us-en/healthcare-professionals/therapies-procedures/cardiovascular/renal-denervation.html",
-      date: "2024 - Present",
+      date: "Aug 2024 – Present",
       details:
-        "Embedded and Linux-platform software for a next-generation renal-denervation device — from sensor silicon bring-up to a secure, self-healing OS.",
+        "Software lead for operating-system and manufacturing software on a next-generation renal-denervation platform — from sensor silicon bring-up to a secure, self-healing OS under regulated design controls.",
       projects: [
         {
           title: "Alpha-1 Embedded Platform",
           description:
-            "Led SPI bring-up and system-level debug of the sensor subsystem with hardware and FPGA teams, and built the HAL drivers — temperature sensing, catheter-state integration, EMI test mode, and EEPROM self-tests.",
+            "Designed the temperature-sensing subsystem firmware and led SPI bring-up and system-level debug with hardware and FPGA teams, including HAL drivers, safety limits, fault detection, and EEPROM self-tests.",
           technology: ["C++", "Embedded", "SPI", "HAL", "FPGA"],
         },
         {
           title: "Aurora OS Reliability",
           description:
             "Built the Linux platform's reliability core: dual-boot with health-gated rollback that refuses to boot an unhealthy image, plus boot validation, health monitoring, and recovery.",
-          technology: ["C++", "Embedded Linux", "Yocto", "Bash"],
+          technology: ["C++", "Embedded Linux", "Yocto", "PetaLinux", "Bash"],
         },
         {
           title: "Secure Build Pipeline",
@@ -55,12 +54,12 @@ export default function Experience() {
     },
     {
       id: "1",
-      title: "Research Engineer, II",
-      company: "Raytheon",
+      title: "Engineer II, Research",
+      company: "Raytheon BBN",
       url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
-      date: "2022 - 2024",
+      date: "Sep 2022 – Apr 2024",
       details:
-        "Developed cross-platform and embedded software for advanced research and development projects.",
+        "Built distributed networking, RF-processing, and field-system software for DoD and DARPA research programs.",
       projects: [
         {
           title: "AORTA/RIPL",
@@ -71,7 +70,7 @@ export default function Experience() {
         {
           title: "MOA",
           description:
-          "Designed and implemented updates to the AngularJS frontend using HTML, CSS, JavaScript and the Python Flask REST API to extend field unit capabilities for end users.",
+            "Designed and implemented updates to the AngularJS frontend using HTML, CSS, JavaScript and the Python Flask REST API to extend field unit capabilities for end users.",
           technology: [
             "AngularJS",
             "Embedded Linux",
@@ -79,13 +78,13 @@ export default function Experience() {
             "Flask",
             "JavaScript",
             "HTML",
-            "CSS"
+            "CSS",
           ],
         },
         {
           title: "DARPA COHO",
           description:
-          "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in TypeScript leveraging React and Tailwind.",
+            "Designed and implemented both the container architecture for an RF engine and cyclostationary signal processor using Python, Docker, Redis, ZMQ and the experimental system user interface in TypeScript leveraging React and Tailwind.",
           technology: [
             "Python",
             "TypeScript",
@@ -101,11 +100,11 @@ export default function Experience() {
     {
       id: "2",
       title: "Associate Scientist",
-      company: "Raytheon",
+      company: "Raytheon BBN",
       url: "https://www.rtx.com/who-we-are/we-are-rtx/transformative-technologies/bbn",
-      date: "2019 - 2022",
+      date: "Oct 2019 – Sep 2022",
       details:
-        "Developed cross-platform and embedded software for advanced research and development projects.",
+        "Developed sensor interfaces, PNT visualization, simulations, and reporting tools for advanced research programs.",
       projects: [
         {
           title: "STOIC",
@@ -116,7 +115,7 @@ export default function Experience() {
         {
           title: "DARPA ASTARTE",
           description:
-          "Designed and implemented an interface to allow communication from new sensor hardware to subscribed nodes on the network in Java using Maven, Eclipse, and JUnit for unit tests.",
+            "Designed and implemented an interface to allow communication from new sensor hardware to subscribed nodes on the network in Java using Maven, Eclipse, and JUnit for unit tests.",
           technology: ["Java", "Networking", "Maven", "Eclipse", "JUnit"],
         },
         {
@@ -134,9 +133,9 @@ export default function Experience() {
       id="experience"
       tabIndex={-1}
       aria-label="Experience"
-      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 lg:w-full lg:overflow-y-scroll lg:pr-24 lg:pt-24"
+      className="experience no-scrollbar flex h-full w-3/4 flex-col gap-4 text-zinc-300 lg:w-full lg:overflow-y-scroll lg:pt-24 lg:pr-24"
     >
-      <h2 className="flex w-1/4 text-xs font-bold uppercase tracking-widest text-zinc-400 lg:sr-only">
+      <h2 className="flex w-1/4 text-xs font-bold tracking-widest text-zinc-400 uppercase lg:sr-only">
         experience
       </h2>
       <div className="flex w-full flex-col gap-6">
@@ -196,14 +195,14 @@ const JobCard = ({
       onMouseLeave={() => applyTheme(false)}
       onFocus={() => applyTheme(true)}
       onBlur={() => applyTheme(false)}
-      className=" job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300"
+      className="job-card flex flex-row gap-2 rounded-lg py-2 pr-1 text-zinc-300 hover:bg-[#4e9fe9]/5 hover:text-blue-300"
     >
-      <p className="h-fit w-1/4 pt-1 text-xs font-semibold tracking-wide lg:text-center ">
+      <p className="h-fit w-1/4 pt-1 text-xs font-semibold tracking-wide lg:text-center">
         {date}
       </p>
       <div className="flex w-3/4 flex-col gap-3">
         <div className="flex flex-col md:flex-row md:items-center md:gap-2">
-          <h3 className="text-base font-semibold ">{title} </h3>
+          <h3 className="text-base font-semibold">{title} </h3>
           <span className="hidden md:flex">{"·"}</span>
           <p className="text-base">{company}</p>
         </div>
@@ -212,15 +211,17 @@ const JobCard = ({
           {projects.map((project) => {
             return (
               <li key={project.title} className="flex w-full">
-                <div className="flex w-full flex-col gap-2  rounded p-2 text-sm">
-                  <h4 className="flex text-xs font-semibold">{project.title}</h4>
+                <div className="flex w-full flex-col gap-2 rounded p-2 text-sm">
+                  <h4 className="flex text-xs font-semibold">
+                    {project.title}
+                  </h4>
                   <p className="flex text-zinc-300">{project.description}</p>
                   <ul className="flex w-full flex-wrap gap-2 text-end text-xs text-zinc-300">
                     {project.technology.map((tech, index) => {
                       return (
                         <li
                           key={index}
-                          className="rounded-full bg-[#6071e2]/10  px-3 py-1  "
+                          className="rounded-full bg-[#6071e2]/10 px-3 py-1"
                         >
                           {tech}
                         </li>

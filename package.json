@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "npm run resume:pdf",
     "build": "next build",
+    "predev": "npm run resume:pdf",
     "dev": "next dev",
     "lint": "eslint .",
+    "resume:pdf": "node scripts/generate-resume-pdf.mjs",
     "start": "next start",
     "smoke": "node scripts/smoke.mjs"
   },
@@ -15,8 +18,10 @@
     "@react-three/fiber": "^9.6.1",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@types/three": "^0.184.1",
+    "marked": "^18.0.11",
     "motion": "^12.40.0",
     "next": "^16.2.6",
+    "pdfkit": "^0.20.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "three": "^0.184.0",
@@ -25,6 +30,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.9.1",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.60.0",

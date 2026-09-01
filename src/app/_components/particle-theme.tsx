@@ -25,7 +25,7 @@ export const useParticleTheme = () => useContext(ParticleThemeContext);
 
 /** Maps a company name to its particle theme (null = no themed shapes). */
 export function themeForCompany(company: string): ParticleTheme {
-  if (company === "Medtronic") return "medtronic";
-  if (company === "Raytheon") return "raytheon";
+  if (company.startsWith("Medtronic")) return "medtronic";
+  if (company.startsWith("Raytheon")) return "raytheon";
   return null;
 }

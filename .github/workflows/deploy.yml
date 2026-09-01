@@ -78,7 +78,9 @@ jobs:
         run: npm run lint
 
       - name: Build with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+        # Use the package script so the Markdown-sourced résumé PDF is generated
+        # before Next copies public assets into the static export.
+        run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium

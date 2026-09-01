@@ -25,7 +25,9 @@
 /* Hide the native cursor only on mouse-driven devices, where the custom
    cursor takes over. Touch and keyboard contexts keep the native cursor. */
 @media (pointer: fine) {
-  body {
+  .custom-cursor-container,
+  .custom-cursor-container a,
+  .custom-cursor-container button {
     cursor: none;
   }
 }
@@ -46,4 +48,73 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Responsive HTML fallback for the résumé. The desktop presentation embeds
+   the generated PDF; this version keeps the same source readable on devices
+   that do not provide a usable inline PDF viewer. */
+.resume-document {
+  color: #d4d4d8;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.resume-document > p:first-child {
+  color: #f4f4f5;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.resume-document h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(96, 113, 226, 0.35);
+  padding-bottom: 0.35rem;
+  color: #93c5fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.resume-document h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.2rem;
+  color: #f4f4f5;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.resume-document p + p {
+  margin-top: 0.6rem;
+}
+
+.resume-document ul {
+  margin-top: 0.6rem;
+  display: flex;
+  list-style: disc;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-left: 1.25rem;
+}
+
+.resume-document strong {
+  color: #f4f4f5;
+  font-weight: 650;
+}
+
+.resume-document em {
+  color: #a1a1aa;
+}
+
+.resume-document a {
+  color: #93c5fd;
+  text-decoration: underline;
+  text-decoration-color: rgba(147, 197, 253, 0.45);
+  text-underline-offset: 0.2em;
+}
+
+.resume-document a:hover {
+  color: #bfdbfe;
 }

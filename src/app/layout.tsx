@@ -40,12 +40,6 @@ export default function RootLayout({
       <body
         className={`font-sans ${inter.variable} no-scrollbar overflow-x-hidden overflow-y-scroll bg-zinc-900 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] lg:overflow-hidden`}
       >
-        <a
-          href="#experience"
-          className="sr-only z-50 rounded bg-zinc-800 px-4 py-2 text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
-        >
-          Skip to experience
-        </a>
         {children}
       </body>
     </html>

@@ -17,6 +17,7 @@ const TYPES = {
   ".json": "application/json",
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
+  ".pdf": "application/pdf",
   ".png": "image/png",
   ".woff2": "font/woff2",
   ".txt": "text/plain",
@@ -28,12 +29,15 @@ const server = createServer(async (req, res) => {
     if (urlPath === "/") urlPath = "/index.html";
     let filePath = join(OUT, normalize(urlPath));
     try {
-      if ((await stat(filePath)).isDirectory()) filePath = join(filePath, "index.html");
+      if ((await stat(filePath)).isDirectory())
+        filePath = join(filePath, "index.html");
     } catch {
       if (!extname(filePath)) filePath += ".html";
     }
     const body = await readFile(filePath);
-    res.writeHead(200, { "content-type": TYPES[extname(filePath)] || "application/octet-stream" });
+    res.writeHead(200, {
+      "content-type": TYPES[extname(filePath)] || "application/octet-stream",
+    });
     res.end(body);
   } catch {
     res.writeHead(404);
@@ -120,14 +124,96 @@ async function check(label, { reducedMotion, viewport, shot }) {
 
   console.log(`--- ${label} ---`);
   console.log(
-    "name visible:", nameVisible,
-    "| canvas:", canvasCount,
-    "| glHealthy:", glHealthy,
-    "| cursorGlow:", cursorGlowOk,
+    "name visible:",
+    nameVisible,
+    "| canvas:",
+    canvasCount,
+    "| glHealthy:",
+    glHealthy,
+    "| cursorGlow:",
+    cursorGlowOk,
     webglEnvFailure ? "| (WebGL unavailable — environmental, ignored)" : "",
   );
-  console.log("pageErrors (real):", badPageErrors.length ? badPageErrors : "none");
-  console.log("console errors (non-benign):", badConsole.length ? badConsole : "none");
+  console.log(
+    "pageErrors (real):",
+    badPageErrors.length ? badPageErrors : "none",
+  );
+  console.log(
+    "console errors (non-benign):",
+    badConsole.length ? badConsole : "none",
+  );
+  return !fatal;
+}
+
+async function checkResume(label, { viewport, expectEmbedded, shot }) {
+  const page = await browser.newPage({ viewport });
+  const consoleErrors = [];
+  const pageErrors = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto(`http://localhost:${PORT}/resume`, {
+    waitUntil: "networkidle",
+  });
+
+  const headingVisible = await page
+    .getByRole("heading", { name: "Ron Rounsifer" })
+    .isVisible()
+    .catch(() => false);
+  const embeddedVisible = await page
+    .locator('object[type="application/pdf"]')
+    .isVisible()
+    .catch(() => false);
+  const htmlVisible = await page
+    .locator(".resume-document")
+    .isVisible()
+    .catch(() => false);
+  const downloadHref = await page
+    .getByRole("link", { name: "Download PDF" })
+    .getAttribute("href");
+
+  const pdfResponse = await page.request.get(
+    `http://localhost:${PORT}/Ron_Rounsifer_Resume.pdf`,
+  );
+  const pdfBytes = await pdfResponse.body();
+  const pdfHealthy =
+    pdfResponse.ok() &&
+    pdfResponse.headers()["content-type"] === "application/pdf" &&
+    pdfBytes.subarray(0, 5).toString() === "%PDF-";
+
+  if (shot) await page.screenshot({ path: shot, fullPage: true });
+  await page.close();
+
+  const badConsole = consoleErrors.filter((error) => !BENIGN.test(error));
+  const presentationHealthy = expectEmbedded
+    ? embeddedVisible && !htmlVisible
+    : htmlVisible && !embeddedVisible;
+  const fatal =
+    pageErrors.length > 0 ||
+    badConsole.length > 0 ||
+    !headingVisible ||
+    !presentationHealthy ||
+    downloadHref !== "/Ron_Rounsifer_Resume.pdf" ||
+    !pdfHealthy;
+
+  console.log(`--- ${label} ---`);
+  console.log(
+    "heading visible:",
+    headingVisible,
+    "| embedded:",
+    embeddedVisible,
+    "| html fallback:",
+    htmlVisible,
+    "| PDF:",
+    pdfHealthy,
+  );
+  console.log("pageErrors:", pageErrors.length ? pageErrors : "none");
+  console.log(
+    "console errors (non-benign):",
+    badConsole.length ? badConsole : "none",
+  );
   return !fatal;
 }
 
@@ -148,6 +234,16 @@ const results = [
     reducedMotion: false,
     viewport: mobile,
     shot: "/tmp/smoke-mobile.png",
+  }),
+  await checkResume("résumé (desktop)", {
+    viewport: desktop,
+    expectEmbedded: true,
+    shot: "/tmp/smoke-resume-desktop.png",
+  }),
+  await checkResume("résumé (mobile)", {
+    viewport: mobile,
+    expectEmbedded: false,
+    shot: "/tmp/smoke-resume-mobile.png",
   }),
 ];
 
